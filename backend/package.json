@@ -1,0 +1,19 @@
+{
+  "name": "ghost-link-backend",
+  "version": "1.0.0",
+  "description": "High-security zero-knowledge WebSocket relay server for Ghost Link Chat",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "nodemon server.js"
+  },
+  "dependencies": {
+    "cors": "^2.8.5",
+    "express": "^4.21.2",
+    "socket.io": "^4.8.1"
+  },
+  "devDependencies": {
+    "nodemon": "^3.1.9"
+  },
+  "private": true
+}
