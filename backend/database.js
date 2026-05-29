@@ -83,39 +83,64 @@ class BlindStorage {
   }
 
   // --- Chat & Room Operations ---
-  createChat(members, type = 'direct', name = '') {
+  createChat(members, type = 'direct', name = '', bio = '', createdBy = '') {
     const chatId = 'chat_' + Math.random().toString(36).substring(2, 15);
+    const creator = createdBy || members[0] || '';
     const chat = {
       id: chatId,
       name: name || (type === 'direct' ? 'Direct Message' : 'Secure Group'),
+      bio: bio || '',
       type,
       members: new Set(members),
+      createdBy: creator,
+      admins: new Set([creator]),
       createdAt: Date.now()
     };
     this.chats.set(chatId, chat);
-    return chat;
+    return this._serialize(chat);
+  }
+
+  _serialize(chat) {
+    return {
+      ...chat,
+      members: Array.from(chat.members),
+      admins:  Array.from(chat.admins)
+    };
   }
 
   getChat(chatId) {
     const chat = this.chats.get(chatId);
     if (!chat) return null;
-    return {
-      ...chat,
-      members: Array.from(chat.members)
-    };
+    return this._serialize(chat);
   }
 
   getUserChats(randomId) {
     const userChats = [];
     for (const chat of this.chats.values()) {
       if (chat.members.has(randomId)) {
-        userChats.push({
-          ...chat,
-          members: Array.from(chat.members)
-        });
+        userChats.push(this._serialize(chat));
       }
     }
     return userChats;
+  }
+
+  makeAdmin(chatId, requesterId, targetId) {
+    const chat = this.chats.get(chatId);
+    if (!chat) throw new Error('Chat not found');
+    if (!chat.admins.has(requesterId)) throw new Error('Only admins can promote members');
+    if (!chat.members.has(targetId)) throw new Error('User is not in this group');
+    chat.admins.add(targetId);
+    return this._serialize(chat);
+  }
+
+  kickMember(chatId, requesterId, targetId) {
+    const chat = this.chats.get(chatId);
+    if (!chat) throw new Error('Chat not found');
+    if (!chat.admins.has(requesterId)) throw new Error('Only admins can remove members');
+    if (targetId === chat.createdBy) throw new Error('Cannot remove the group creator');
+    chat.members.delete(targetId);
+    chat.admins.delete(targetId);
+    return this._serialize(chat);
   }
 
   // --- Encrypted Message Operations ---

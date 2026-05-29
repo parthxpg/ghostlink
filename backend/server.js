@@ -70,11 +70,11 @@ app.get('/api/chats/:chatId/messages', (req, res) => {
 
 // Create secure direct or group chat
 app.post('/api/chats/create', (req, res) => {
-  const { members, type, name } = req.body;
+  const { members, type, name, bio, createdBy } = req.body;
   if (!members || !Array.isArray(members) || members.length < 2) {
     return res.status(400).json({ error: "Invalid chat participants list" });
   }
-  const chat = db.createChat(members, type, name);
+  const chat = db.createChat(members, type, name, bio, createdBy);
   
   // Notify active users of the new chat
   members.forEach(memberId => {
@@ -86,6 +86,46 @@ app.post('/api/chats/create', (req, res) => {
 
   return res.json(chat);
 });
+
+// Get full chat info (group details, admins, members)
+app.get('/api/chats/:chatId', (req, res) => {
+  const chat = db.getChat(req.params.chatId);
+  if (!chat) return res.status(404).json({ error: 'Chat not found' });
+  return res.json(chat);
+});
+
+// Make a member admin
+app.post('/api/chats/:chatId/admin', (req, res) => {
+  const { requesterId, targetId } = req.body;
+  try {
+    const chat = db.makeAdmin(req.params.chatId, requesterId, targetId);
+    // Notify all members of the update
+    chat.members.forEach(memberId => {
+      const socketId = activeConnections.get(memberId);
+      if (socketId) io.to(socketId).emit('group_updated', chat);
+    });
+    return res.json(chat);
+  } catch (err) {
+    return res.status(403).json({ error: err.message });
+  }
+});
+
+// Kick a member
+app.post('/api/chats/:chatId/kick', (req, res) => {
+  const { requesterId, targetId } = req.body;
+  try {
+    const chat = db.kickMember(req.params.chatId, requesterId, targetId);
+    // Notify all remaining members + kicked user
+    [...chat.members, targetId].forEach(memberId => {
+      const socketId = activeConnections.get(memberId);
+      if (socketId) io.to(socketId).emit('group_updated', { ...chat, kickedId: targetId });
+    });
+    return res.json(chat);
+  } catch (err) {
+    return res.status(403).json({ error: err.message });
+  }
+});
+
 
 // --- Socket.io Real-Time Protocol ---
 io.on('connection', (socket) => {

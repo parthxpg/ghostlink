@@ -13,15 +13,6 @@
 </head>
 <body>
 
-  <!-- ========== SCREENSHOT SHIELD ========== -->
-  <div id="screenshotShield" class="shield">
-    <div class="shield-content">
-      <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/><line x1="1" y1="1" x2="23" y2="23" stroke-width="2"/></svg>
-      <h2>Chat Hidden</h2>
-      <p>Screen capture detected. Click below to resume.</p>
-      <button onclick="dismissShield()" class="shield-resume-btn">Resume Chat</button>
-    </div>
-  </div>
 
   <!-- ========== TOAST CONTAINER ========== -->
   <div id="toastContainer" class="toast-container"></div>
@@ -111,6 +102,46 @@
       </div>
     </section>
 
+    <!-- Privacy Feature Explanation Section -->
+    <section id="privacy" class="privacy-section">
+      <div class="privacy-content">
+        <h2 class="section-title">Built for Absolute Privacy</h2>
+        <p class="privacy-subtitle">We believe your conversations are yours alone. Here's how we protect them:</p>
+        
+        <div class="privacy-details">
+          <div class="privacy-item">
+            <div class="privacy-item-icon">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+            </div>
+            <div class="privacy-item-text">
+              <h4>Zero-Knowledge E2EE</h4>
+              <p>Every message is encrypted locally using AES-GCM and RSA-OAEP before leaving your device. Our servers only route encrypted blobs and never possess the keys to decrypt your data.</p>
+            </div>
+          </div>
+          
+          <div class="privacy-item">
+            <div class="privacy-item-icon">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M2 12h4l2-9 4 18 2-9h4"/></svg>
+            </div>
+            <div class="privacy-item-text">
+              <h4>No Identity Tracking</h4>
+              <p>Unlike other platforms, Ghost Link requires no email, phone number, or social logins. You operate solely under a randomly generated Ghost ID, making you completely anonymous.</p>
+            </div>
+          </div>
+
+          <div class="privacy-item">
+            <div class="privacy-item-icon">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><line x1="3" y1="9" x2="21" y2="9"/><line x1="9" y1="21" x2="9" y2="9"/></svg>
+            </div>
+            <div class="privacy-item-text">
+              <h4>Screenshot Protection</h4>
+              <p>Our client detects screenshot attempts via OS level shortcuts or focus loss. If triggered, your chat is instantly hidden and your peer is securely alerted.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
     <!-- Footer -->
     <footer class="landing-footer">
       <p>© 2026 Ghost Link. Client-side encrypted. Always.</p>
@@ -129,33 +160,7 @@
           <p>Sign in to start a secure session</p>
         </div>
 
-        <!-- Email login form -->
-        <div class="auth-form">
-          <div class="input-group">
-            <svg class="input-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
-            <input id="emailInput" type="email" placeholder="you@example.com" class="auth-input" />
-          </div>
-          <div class="input-group">
-            <svg class="input-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
-            <input id="passwordInput" type="password" placeholder="Password" class="auth-input" />
-          </div>
-          <button id="emailLoginBtn" class="auth-submit" onclick="emailLogin()">
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"/><polyline points="10 17 15 12 10 7"/><line x1="15" y1="12" x2="3" y2="12"/></svg>
-            Sign in with Email
-          </button>
-        </div>
-
-        <div class="auth-divider"><span>or</span></div>
-
-        <!-- Google login -->
-        <button class="google-login-btn" onclick="googleLogin()">
-          <svg width="20" height="20" viewBox="0 0 48 48"><path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"/><path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"/><path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z"/><path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.15 1.45-4.92 2.3-8.16 2.3-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"/></svg>
-          Continue with Google
-        </button>
-
-        <div class="auth-divider"><span>or use a Ghost ID</span></div>
-
-        <!-- Ghost ID quick login -->
+        <!-- Ghost ID login -->
         <div class="ghost-id-section">
           <div class="input-group">
             <svg class="input-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
@@ -198,20 +203,59 @@
         </div>
         <div class="search-container">
           <input id="peerSearchInput" type="text" placeholder="Search Ghost ID..." class="search-input" />
-          <button onclick="searchAndAddPeer()" class="add-btn">
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+          <button onclick="searchAndAddPeer()" class="add-btn" title="Start direct chat">
+            <!-- Compose / message icon -->
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
           </button>
         </div>
         <ul id="chatsContainer" class="chat-list"></ul>
+
+        <!-- Floating + FAB -->
+        <button class="fab-btn" id="fabBtn" onclick="toggleGroupDialog()" title="New group">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+        </button>
+
+        <!-- Create Group Dialog -->
+        <div class="group-dialog" id="groupDialog">
+          <div class="group-dialog-header">
+            <span>New Group</span>
+            <button onclick="toggleGroupDialog()" class="group-dialog-close">✕</button>
+          </div>
+          <input id="groupNameInput" type="text" placeholder="Group name..." class="group-dialog-input" />
+          <textarea id="groupBioInput" placeholder="Group bio (optional)..." class="group-dialog-input group-bio-input"></textarea>
+          <div class="group-member-row">
+            <input id="groupMemberInput" type="text" placeholder="Add Ghost ID..." class="group-dialog-input" style="flex:1;margin-bottom:0" />
+            <button onclick="addGroupMember()" class="group-add-member-btn">+</button>
+          </div>
+          <ul id="groupMemberList" class="group-member-list"></ul>
+          <button onclick="createGroupChat()" class="group-create-btn">Create Group</button>
+        </div>
+
         <button class="logout-btn" onclick="logout()">
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
           Logout
         </button>
       </aside>
 
+
+      <!-- Group Info Panel -->
+      <aside class="group-info-panel" id="groupInfoPanel">
+        <div class="gip-header">
+          <h3 id="gipName">Group</h3>
+          <button onclick="closeGroupInfo()" class="gip-close">✕</button>
+        </div>
+        <p class="gip-bio" id="gipBio"></p>
+        <div class="gip-meta">
+          <span id="gipCreatedBy"></span>
+          <span id="gipCreatedAt"></span>
+        </div>
+        <div class="gip-section-title">Members</div>
+        <ul id="gipMemberList" class="gip-member-list"></ul>
+      </aside>
+
       <!-- Chat Window -->
       <main class="chat-window" id="chatWindow">
-        <header class="chat-header">
+        <header class="chat-header" id="chatHeader" style="cursor:pointer" onclick="handleChatHeaderClick()">
           <canvas id="roomPfpCanvas" class="pfp-canvas"></canvas>
           <div class="room-info">
             <h3 id="roomTitleDisplay">Select a chat</h3>
