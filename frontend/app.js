@@ -747,6 +747,66 @@ async function forwardMessageToTarget(messageId, receiverId, aesKey) {
 }
 
 /** ------------------------------------------------------------------
+ * Group Info Panel Additions (Share & Add Member)
+ * ------------------------------------------------------------------ */
+
+// Share group by copying its ID to the clipboard
+function shareGroup() {
+  if (!currentGroupInfo) return;
+  navigator.clipboard.writeText(currentGroupInfo.id).then(() => {
+    showToast('Group ID copied to clipboard!', 'success');
+  }).catch(err => {
+    showToast('Failed to copy Group ID', 'error');
+  });
+}
+
+// Add a new member to an existing group
+async function addNewMemberToGroup() {
+  if (!currentGroupInfo) return;
+  
+  const input = document.getElementById('newGipMemberInput');
+  const newMemberId = input.value.trim();
+  
+  if (!newMemberId) {
+    showToast('Please enter a Ghost ID', 'error');
+    return;
+  }
+
+  // Duplicate/Self Checks
+  if (newMemberId === myGhostId) {
+    showToast('You are already in the group!', 'error');
+    return;
+  }
+  
+  if (currentGroupInfo.members.includes(newMemberId)) {
+    showToast('User is already in the group!', 'warning');
+    return;
+  }
+
+  try {
+    const res = await fetch(`${API_URL}/api/chats/${currentGroupInfo.id}/add-member`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ requesterId: myGhostId, newMemberId })
+    });
+    
+    if (!res.ok) {
+      const err = await res.json();
+      throw new Error(err.error || 'Failed to add member');
+    }
+    
+    const updatedChat = await res.json();
+    input.value = ''; // Clear input on success
+    showToast(`${newMemberId} added to the group!`, 'success');
+    
+    // Refresh the group info panel with the new data
+    openGroupInfo(updatedChat);
+  } catch (err) {
+    showToast(err.message, 'error');
+  }
+}
+
+/** ------------------------------------------------------------------
  *  Visual Utilities
  * ------------------------------------------------------------------ */
 function showToast(msg, type = 'info') {

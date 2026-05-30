@@ -245,7 +245,7 @@
       </aside>
 
       <!-- Group Info Panel -->
-      <aside class="group-info-panel" id="groupInfoPanel">
+       <aside class="group-info-panel" id="groupInfoPanel">
         <div class="gip-header">
           <h3 id="gipName">Group</h3>
           <button onclick="closeGroupInfo()" class="gip-close">✕</button>
@@ -255,10 +255,22 @@
           <span id="gipCreatedBy"></span>
           <span id="gipCreatedAt"></span>
         </div>
+        
+        <div class="gip-actions">
+          <button onclick="shareGroup()" class="gip-btn-outline">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"/><polyline points="16 6 12 2 8 6"/><line x1="12" y1="2" x2="12" y2="15"/></svg>
+            Share Group
+          </button>
+        </div>
+
+        <div class="gip-add-member">
+          <input id="newGipMemberInput" type="text" placeholder="Add Ghost ID..." class="group-dialog-input" />
+          <button onclick="addNewMemberToGroup()" class="group-add-member-btn">+</button>
+        </div>
         <div class="gip-section-title">Members</div>
         <ul id="gipMemberList" class="gip-member-list"></ul>
       </aside>
-
+      
       <!-- Chat Window -->
       <main class="chat-window" id="chatWindow">
         <header class="chat-header" id="chatHeader" style="cursor:pointer" onclick="handleChatHeaderClick()">
