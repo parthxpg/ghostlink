@@ -126,6 +126,36 @@ app.post('/api/chats/:chatId/kick', (req, res) => {
   }
 });
 
+// Add a member to an existing chat
+app.post('/api/chats/:chatId/add-member', (req, res) => {
+  const { requesterId, newMemberId } = req.body;
+  const { chatId } = req.params;
+
+  try {
+    if (!requesterId || !newMemberId) {
+      throw new Error("Missing requesterId or newMemberId");
+    }
+
+    if (!db.getUser(newMemberId)) {
+      throw new Error("Target Ghost ID not found on server");
+    }
+
+    // Call the database method we added earlier
+    const chat = db.addMember(chatId, requesterId, newMemberId);
+
+    // Notify all members (including the new one) that the group updated
+    chat.members.forEach(memberId => {
+      const socketId = activeConnections.get(memberId);
+      if (socketId) {
+        io.to(socketId).emit('group_updated', chat);
+      }
+    });
+
+    return res.json(chat);
+  } catch (err) {
+    return res.status(403).json({ error: err.message });
+  }
+});
 
 // --- Socket.io Real-Time Protocol ---
 io.on('connection', (socket) => {
