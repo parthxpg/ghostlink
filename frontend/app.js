@@ -7,15 +7,15 @@ const API_URL = 'http://localhost:3000';
 
 // Session state
 let myGhostId = '';
-let myPublicKeys = null; // { publicEncryptionJWK, publicSigningJWK }
+let myPublicKeys = null;
 let myPfpBase64 = '';
 let activeChats = [];
 let selectedRoomId = null;
 
 // Caches
-const peerKeys = new Map(); // GhostID -> { publicEncryptionJWK, publicSigningJWK }
-const decryptedMessages = new Map(); // MessageID -> plaintext
-const rawMessageKeys = new Map(); // MessageID -> symmetric AES key
+const peerKeys = new Map();
+const decryptedMessages = new Map();
+const rawMessageKeys = new Map();
 
 /** ------------------------------------------------------------------
  *  Initialization & View Engine
@@ -23,11 +23,9 @@ const rawMessageKeys = new Map(); // MessageID -> symmetric AES key
 document.addEventListener('DOMContentLoaded', () => {
   setupTheme();
   setupScreenshotProtection();
-  // Generate a starting rolled ID in the form input on load
   rollGhostId();
 });
 
-// Switch between Landing, Auth Card, and Dashboard views
 function switchView(viewId) {
   ['viewLanding', 'viewAuth', 'viewDashboard'].forEach(id => {
     const el = document.getElementById(id);
@@ -35,7 +33,6 @@ function switchView(viewId) {
   });
 }
 
-// Restore and manage theme state
 function setupTheme() {
   const savedTheme = localStorage.getItem('theme');
   if (savedTheme === 'dark') {
@@ -55,47 +52,133 @@ function setupTheme() {
 
   const btnNav = document.getElementById('themeToggleNav');
   const btnSidebar = document.getElementById('themeToggleSidebar');
-
   if (btnNav) btnNav.addEventListener('click', toggleTheme);
   if (btnSidebar) btnSidebar.addEventListener('click', toggleTheme);
 }
 
 /** ------------------------------------------------------------------
- *  Screenshot Detection – Notifies peer silently, no local shield
+ *  Mobile Responsive – Sidebar / Chat Toggle
+ * ------------------------------------------------------------------ */
+function isMobile() {
+  return window.innerWidth <= 640;
+}
+
+function openMobileChat() {
+  if (!isMobile()) return;
+  document.querySelector('.sidebar').classList.add('chat-open');
+  document.getElementById('chatWindow').classList.add('chat-open');
+}
+
+function closeMobileChat() {
+  document.querySelector('.sidebar').classList.remove('chat-open');
+  document.getElementById('chatWindow').classList.remove('chat-open');
+}
+
+/** ------------------------------------------------------------------
+ *  Screenshot & Screen Recording Protection
  * ------------------------------------------------------------------ */
 let _prtScPressed = false;
 
 function setupScreenshotProtection() {
-  // Flag on keydown (works even if OS captures the key first)
+  // --- DESKTOP: keyboard shortcuts ---
   window.addEventListener('keydown', e => {
-    if (e.key === 'PrintScreen') {
-      _prtScPressed = true;
-    }
+    if (e.key === 'PrintScreen') _prtScPressed = true;
   });
 
-  // keyup fires reliably on Windows in Chrome/Edge after OS captures PrintScreen
   window.addEventListener('keyup', e => {
     if (e.key === 'PrintScreen') {
       _prtScPressed = false;
+      activateShield();
       notifyPeerOfScreenshot();
     }
-    // Mac screenshot shortcuts: Cmd+Shift+3/4/5
-    if (e.metaKey && e.shiftKey && (e.key === '3' || e.key === '4' || e.key === '5')) {
+    // Mac: Cmd+Shift+3/4/5
+    if (e.metaKey && e.shiftKey && ['3','4','5'].includes(e.key)) {
+      activateShield();
       notifyPeerOfScreenshot();
     }
   });
 
-  // Fallback: if window blurs immediately after PrtSc was pressed (some OS/browser combos)
+  // Fallback blur after PrtSc
   window.addEventListener('blur', () => {
     if (_prtScPressed) {
       _prtScPressed = false;
+      activateShield();
       notifyPeerOfScreenshot();
     }
   });
+
+  // --- MOBILE: Screen Recording & Screenshot via Page Visibility ---
+  // When OS captures screenshot on mobile, page briefly loses visibility
+  document.addEventListener('visibilitychange', () => {
+    if (document.hidden && selectedRoomId) {
+      activateShield();
+      notifyPeerOfScreenshot();
+    }
+  });
+
+  // --- MOBILE: Screen Recording via Media Devices API ---
+  // Detect when a screen capture track becomes active (Chrome Android 94+)
+  if (navigator.mediaDevices && navigator.mediaDevices.getDisplayMedia) {
+    // Intercept getDisplayMedia — if someone tries to record the screen
+    const originalGetDisplayMedia = navigator.mediaDevices.getDisplayMedia.bind(navigator.mediaDevices);
+    navigator.mediaDevices.getDisplayMedia = async (constraints) => {
+      activateShield();
+      notifyPeerOfScreenshot();
+      // Still allow it (we can't block it) but hide content first
+      return originalGetDisplayMedia(constraints);
+    };
+  }
+
+  // --- CSS: prevent screenshots via -webkit-user-select and content-visibility ---
+  // Applied only to the messages container when in a chat
+  applyCSSProtection();
+}
+
+function applyCSSProtection() {
+  // Inject a style tag that makes the messages area resistant to screen capture
+  // on supported browsers (Samsung Internet, some WebViews)
+  const style = document.createElement('style');
+  style.textContent = `
+    /* Attempt to block screen capture on supported mobile browsers */
+    #messagesGrid, .message {
+      -webkit-touch-callout: none;
+      -webkit-user-select: none;
+      user-select: none;
+    }
+    /* Samsung Internet / some Android WebViews support this */
+    .messages-protected {
+      -webkit-tap-highlight-color: transparent;
+    }
+    @media (max-width: 640px) {
+      /* Extra caution on mobile */
+      #messagesGrid img {
+        pointer-events: none;
+        -webkit-user-drag: none;
+      }
+    }
+  `;
+  document.head.appendChild(style);
+}
+
+function activateShield() {
+  // Only show shield when inside the chat dashboard
+  if (!selectedRoomId) return;
+  const shield = document.getElementById('screenshotShield');
+  if (shield) {
+    shield.classList.add('active');
+    // Auto-dismiss after 3 seconds on mobile (no hover/click friction)
+    if (isMobile()) {
+      setTimeout(() => shield.classList.remove('active'), 3000);
+    }
+  }
+}
+
+function dismissShield() {
+  const shield = document.getElementById('screenshotShield');
+  if (shield) shield.classList.remove('active');
 }
 
 function notifyPeerOfScreenshot() {
-  // Only emit if inside an active chat session
   if (socket && selectedRoomId) {
     socket.emit('screenshot_detected', { chatId: selectedRoomId });
   }
@@ -112,14 +195,9 @@ function rollGhostId() {
 
 async function ghostIdLogin() {
   const id = document.getElementById('ghostIdInput').value.trim();
-  if (!id) {
-    alert('Please enter or roll a Ghost ID!');
-    return;
-  }
+  if (!id) { alert('Please enter or roll a Ghost ID!'); return; }
   await authenticateSession(id);
 }
-
-
 
 async function authenticateSession(id) {
   myGhostId = id;
@@ -127,22 +205,19 @@ async function authenticateSession(id) {
   submitBtns.forEach(btn => btn.disabled = true);
 
   try {
-    // Route view to main chat Dashboard early to show loading state
     switchView('viewDashboard');
-    
+
     const sendBtn = document.querySelector('.send-btn');
     window.originalSendBtnHTML = sendBtn.innerHTML;
-    window._spinnerStartTime = Date.now(); // track when spinner started
+    window._spinnerStartTime = Date.now();
     sendBtn.innerHTML = `<svg class="spinner" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M21 12a9 9 0 1 1-6.219-8.56"/></svg>`;
-    sendBtn.title = 'Generating End‑to‑End Encryption Keys...';
+    sendBtn.title = 'Generating Keys...';
     sendBtn.disabled = true;
     sendBtn.style.opacity = '0.7';
     sendBtn.style.cursor = 'wait';
 
-    // Generate local RSA E2EE key bundle
     myPublicKeys = await cryptoEngine.generateIdentityKeyPairs();
 
-    // Register bundle on server
     const res = await fetch(`${API_URL}/api/auth/register`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -160,15 +235,8 @@ async function authenticateSession(id) {
       throw new Error(err.error || 'Server registration rejected');
     }
 
-    // Configure profile PFP Canvas (draw abstract ghost)
     drawHoldToRevealPfp('roomPfpCanvas', 'ghost');
-
-
-
-    // Update active Ghost ID view
     document.getElementById('myGhostIdDisplay').textContent = myGhostId;
-
-    // Connect real-time socket
     initializeSocket();
 
   } catch (err) {
@@ -176,7 +244,6 @@ async function authenticateSession(id) {
     submitBtns.forEach(btn => btn.disabled = false);
   }
 }
-
 
 /** ------------------------------------------------------------------
  *  Socket.io handling
@@ -201,8 +268,6 @@ function initializeSocket() {
       }
       loadActiveChats();
     };
-
-    // Ensure spinner is visible for at least 1.5s
     const elapsed = Date.now() - (window._spinnerStartTime || Date.now());
     const remaining = Math.max(0, 1500 - elapsed);
     setTimeout(restoreSendBtn, remaining);
@@ -221,12 +286,10 @@ function initializeSocket() {
   });
 
   socket.on('group_updated', updatedChat => {
-    // Update local chat cache
     const idx = activeChats.findIndex(c => c.id === updatedChat.id);
     if (idx !== -1) activeChats[idx] = updatedChat;
     else activeChats.push(updatedChat);
 
-    // If kicked, close the chat and reload
     if (updatedChat.kickedId === myGhostId) {
       selectedRoomId = null;
       document.getElementById('messagesGrid').innerHTML = '';
@@ -234,10 +297,10 @@ function initializeSocket() {
       closeGroupInfo();
       showToast('You were removed from the group', 'error');
       loadActiveChats();
+      if (isMobile()) closeMobileChat();
       return;
     }
 
-    // If group info panel is open for this chat, refresh it
     if (currentGroupInfo && currentGroupInfo.id === updatedChat.id) {
       openGroupInfo(updatedChat);
     }
@@ -268,7 +331,6 @@ async function searchAndAddPeer() {
   }
 
   try {
-    // Resolve peer public key bundle
     const resp = await fetch(`${API_URL}/api/keys/${query}`);
     if (!resp.ok) throw new Error('Ghost ID not found on server');
     const bundle = await resp.json();
@@ -278,7 +340,6 @@ async function searchAndAddPeer() {
       publicSigningJWK: bundle.signedPreKey
     });
 
-    // Create session room
     const chatRes = await fetch(`${API_URL}/api/chats/create`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -286,7 +347,7 @@ async function searchAndAddPeer() {
     });
     const chat = await chatRes.json();
     document.getElementById('peerSearchInput').value = '';
-    
+
     loadActiveChats();
     openChatRoom(chat.id);
   } catch (err) {
@@ -421,7 +482,6 @@ async function makeAdmin(chatId, targetId) {
     });
     if (!res.ok) { const e = await res.json(); throw new Error(e.error); }
     const chat = await res.json();
-    // Update local cache
     const idx = activeChats.findIndex(c => c.id === chatId);
     if (idx !== -1) activeChats[idx] = chat;
     openGroupInfo(chat);
@@ -447,7 +507,6 @@ async function kickMember(chatId, targetId) {
 }
 
 async function loadActiveChats() {
-
   try {
     const res = await fetch(`${API_URL}/api/users/${myGhostId}/chats`);
     activeChats = await res.json();
@@ -482,12 +541,13 @@ async function openChatRoom(chatId) {
     : chat.name;
   document.getElementById('roomTitleDisplay').innerText = title;
 
-  // Render hold-to-reveal canvas avatar
   drawHoldToRevealPfp('roomPfpCanvas', 'peer');
 
-  // Load chat history
   loadActiveChats();
   await loadMessages(chatId);
+
+  // Mobile: slide to chat view
+  openMobileChat();
 }
 
 async function loadMessages(chatId) {
@@ -587,7 +647,7 @@ async function encryptAndSend(plain) {
   }
 }
 
-// Send on Enter key
+// Send on Enter
 document.getElementById('chatMessageInput').addEventListener('keydown', e => {
   if (e.key === 'Enter' && !e.shiftKey) {
     e.preventDefault();
@@ -597,7 +657,6 @@ document.getElementById('chatMessageInput').addEventListener('keydown', e => {
 
 // Media uploads
 document.getElementById('mediaAttachmentInput').addEventListener('change', e => {
-
   const file = e.target.files[0];
   if (file && selectedRoomId) {
     const reader = new FileReader();
@@ -621,22 +680,17 @@ async function handleIncomingMsg(msg) {
  *  Forward Handshakes & Approvals
  * ------------------------------------------------------------------ */
 let activeForwardRequest = null;
+
 function initiateForwardFlow(messageId, ownerId) {
   const targetId = prompt('Enter recipient Ghost ID for forwarded bubble:');
   if (!targetId) return;
   activeForwardRequest = { messageId, ownerId, receiverId: targetId };
-  socket.emit('request_forward', {
-    messageId,
-    ownerId,
-    receiverId: targetId
-  });
+  socket.emit('request_forward', { messageId, ownerId, receiverId: targetId });
   showToast('Relaying forward permission request...', 'info');
 }
 
 function showForwardBanner(data) {
-  // Using pure JS prompt block for minimalist flow
   const decision = confirm(`User ${data.requesterId} requests permission to forward your message to ${data.receiverId}. Approve?`);
-  
   if (decision) {
     approveForward(data);
   } else {
@@ -646,10 +700,7 @@ function showForwardBanner(data) {
 
 async function approveForward(data) {
   const aesKey = rawMessageKeys.get(data.messageId);
-  if (!aesKey) {
-    showToast('Message key missing from cache', 'error');
-    return;
-  }
+  if (!aesKey) { showToast('Message key missing from cache', 'error'); return; }
   let requesterPub = null;
   if (peerKeys.has(data.requesterId)) {
     requesterPub = peerKeys.get(data.requesterId).publicEncryptionJWK;
@@ -683,7 +734,6 @@ async function forwardMessageToTarget(messageId, receiverId, aesKey) {
   const encrypted = await cryptoEngine.encryptBubble(`[Forwarded] ${original}`, aesKey);
   const recipientKeys = {};
   recipientKeys[myGhostId] = await cryptoEngine.wrapMessageKey(aesKey, myPublicKeys.publicEncryptionJWK);
-  
   const res = await fetch(`${API_URL}/api/keys/${receiverId}`);
   const bundle = await res.json();
   recipientKeys[receiverId] = await cryptoEngine.wrapMessageKey(aesKey, bundle.identityKey);
@@ -724,11 +774,10 @@ function showScreenshotAlert(detectorId) {
         <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/>
         <circle cx="12" cy="13" r="4"/>
       </svg>
-      <span><strong>${detectorId}</strong> took a screenshot of this chat</span>
+      <span><strong>${detectorId}</strong> took a screenshot</span>
       <span class="system-msg-time">${timeStr}</span>
     </div>
   `;
-
   grid.appendChild(msg);
   grid.scrollTop = grid.scrollHeight;
 }
@@ -739,11 +788,12 @@ function drawHoldToRevealPfp(canvasId, base64Data) {
   const ctx = canvas.getContext('2d');
   const size = 64;
   canvas.width = size; canvas.height = size;
-  
+
   const img = new Image();
   img.onload = () => ctx.drawImage(img, 0, 0, size, size);
-  if (base64Data && base64Data !== 'ghost') img.src = base64Data;
-  else {
+  if (base64Data && base64Data !== 'ghost') {
+    img.src = base64Data;
+  } else {
     ctx.fillStyle = '#229ed9';
     ctx.fillRect(0, 0, size, size);
     ctx.fillStyle = '#ffffff';

@@ -13,6 +13,14 @@
 </head>
 <body>
 
+  <!-- ========== SCREENSHOT SHIELD ========== -->
+  <div id="screenshotShield" class="shield">
+    <div class="shield-content">
+      <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/><line x1="1" y1="1" x2="23" y2="23" stroke-width="2"/></svg>
+      <h2>Screen Blocked</h2>
+      <p>Recording or capture detected. Chat is hidden.</p>
+    </div>
+  </div>
 
   <!-- ========== TOAST CONTAINER ========== -->
   <div id="toastContainer" class="toast-container"></div>
@@ -204,7 +212,6 @@
         <div class="search-container">
           <input id="peerSearchInput" type="text" placeholder="Search Ghost ID..." class="search-input" />
           <button onclick="searchAndAddPeer()" class="add-btn" title="Start direct chat">
-            <!-- Compose / message icon -->
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
           </button>
         </div>
@@ -237,7 +244,6 @@
         </button>
       </aside>
 
-
       <!-- Group Info Panel -->
       <aside class="group-info-panel" id="groupInfoPanel">
         <div class="gip-header">
@@ -256,6 +262,13 @@
       <!-- Chat Window -->
       <main class="chat-window" id="chatWindow">
         <header class="chat-header" id="chatHeader" style="cursor:pointer" onclick="handleChatHeaderClick()">
+          <!-- Mobile back button -->
+          <button class="mobile-back-btn" onclick="closeMobileChat(); event.stopPropagation();">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+              <polyline points="15 18 9 12 15 6"/>
+            </svg>
+            Back
+          </button>
           <canvas id="roomPfpCanvas" class="pfp-canvas"></canvas>
           <div class="room-info">
             <h3 id="roomTitleDisplay">Select a chat</h3>
