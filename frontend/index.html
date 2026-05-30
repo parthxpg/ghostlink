@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -10,17 +11,17 @@
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
   <script src="https://cdn.socket.io/4.8.1/socket.io.min.js"></script>
   <link rel="stylesheet" href="styles.css" />
+  <link rel="stylesheet" href="profile.css" />
+  <script src="https://accounts.google.com/gsi/client" onload="initGoogleSignIn()" async defer></script>
+  <script>
+    if (localStorage.getItem('gl_token')) {
+      document.documentElement.classList.add('auto-logging-in');
+    }
+  </script>
 </head>
+
 <body>
 
-  <!-- ========== SCREENSHOT SHIELD ========== -->
-  <div id="screenshotShield" class="shield">
-    <div class="shield-content">
-      <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/><line x1="1" y1="1" x2="23" y2="23" stroke-width="2"/></svg>
-      <h2>Screen Blocked</h2>
-      <p>Recording or capture detected. Chat is hidden.</p>
-    </div>
-  </div>
 
   <!-- ========== TOAST CONTAINER ========== -->
   <div id="toastContainer" class="toast-container"></div>
@@ -31,13 +32,31 @@
     <!-- Navbar -->
     <nav class="landing-nav">
       <div class="nav-left">
-        <svg class="nav-logo-icon" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2a7 7 0 0 0-7 7c0 3 1.5 5.5 3 7.5L12 22l4-5.5c1.5-2 3-4.5 3-7.5a7 7 0 0 0-7-7z"/><circle cx="12" cy="9" r="2.5"/></svg>
+        <svg class="nav-logo-icon" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+          stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M12 2a7 7 0 0 0-7 7c0 3 1.5 5.5 3 7.5L12 22l4-5.5c1.5-2 3-4.5 3-7.5a7 7 0 0 0-7-7z" />
+          <circle cx="12" cy="9" r="2.5" />
+        </svg>
         <span class="nav-logo-text">Ghost Link</span>
       </div>
       <div class="nav-right">
         <button id="themeToggleNav" class="theme-toggle" aria-label="Toggle theme">
-          <svg class="icon-sun" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>
-          <svg class="icon-moon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+          <svg class="icon-sun" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+            stroke-width="2">
+            <circle cx="12" cy="12" r="5" />
+            <line x1="12" y1="1" x2="12" y2="3" />
+            <line x1="12" y1="21" x2="12" y2="23" />
+            <line x1="4.22" y1="4.22" x2="5.64" y2="5.64" />
+            <line x1="18.36" y1="18.36" x2="19.78" y2="19.78" />
+            <line x1="1" y1="12" x2="3" y2="12" />
+            <line x1="21" y1="12" x2="23" y2="12" />
+            <line x1="4.22" y1="19.78" x2="5.64" y2="18.36" />
+            <line x1="18.36" y1="5.64" x2="19.78" y2="4.22" />
+          </svg>
+          <svg class="icon-moon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+            stroke-width="2">
+            <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z" />
+          </svg>
         </button>
         <button class="nav-cta" onclick="switchView('viewAuth')">Get Started</button>
       </div>
@@ -46,8 +65,9 @@
     <!-- Hero Section -->
     <section class="hero">
       <div class="hero-badge">End‑to‑end encrypted</div>
-      <h1 class="hero-title">Private messaging,<br/>simplified.</h1>
-      <p class="hero-subtitle">Ghost Link keeps your conversations truly private with<br/>zero-knowledge encryption. No phone number. No data stored.</p>
+      <h1 class="hero-title">Private messaging,<br />simplified.</h1>
+      <p class="hero-subtitle">Ghost Link keeps your conversations truly private with<br />zero-knowledge encryption. No
+        phone number. No data stored.</p>
       <div class="hero-actions">
         <button class="btn-primary" onclick="switchView('viewAuth')">Start Chatting</button>
         <a href="#features" class="btn-ghost">Learn more ↓</a>
@@ -61,7 +81,10 @@
 
         <div class="feature-card">
           <div class="feature-icon">
-            <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+            <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+              <rect x="3" y="11" width="18" height="11" rx="2" ry="2" />
+              <path d="M7 11V7a5 5 0 0 1 10 0v4" />
+            </svg>
           </div>
           <h3>Zero‑Knowledge E2EE</h3>
           <p>Messages are encrypted on your device. Even we can't read them.</p>
@@ -69,7 +92,9 @@
 
         <div class="feature-card">
           <div class="feature-icon">
-            <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+            <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+              <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2" />
+            </svg>
           </div>
           <h3>Real‑Time Messaging</h3>
           <p>WebSocket‑powered delivery with zero noticeable latency.</p>
@@ -77,7 +102,12 @@
 
         <div class="feature-card">
           <div class="feature-icon">
-            <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+            <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+              <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" />
+              <circle cx="9" cy="7" r="4" />
+              <path d="M23 21v-2a4 4 0 0 0-3-3.87" />
+              <path d="M16 3.13a4 4 0 0 1 0 7.75" />
+            </svg>
           </div>
           <h3>Anonymous IDs</h3>
           <p>No phone numbers. Get a random Ghost ID and start chatting instantly.</p>
@@ -85,7 +115,11 @@
 
         <div class="feature-card">
           <div class="feature-icon">
-            <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="2" y="2" width="20" height="20" rx="5" ry="5"/><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"/><line x1="17.5" y1="6.5" x2="17.51" y2="6.5"/></svg>
+            <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+              <rect x="2" y="2" width="20" height="20" rx="5" ry="5" />
+              <path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z" />
+              <line x1="17.5" y1="6.5" x2="17.51" y2="6.5" />
+            </svg>
           </div>
           <h3>Media Sharing</h3>
           <p>Share images and files – all encrypted before they leave your device.</p>
@@ -93,7 +127,11 @@
 
         <div class="feature-card">
           <div class="feature-icon">
-            <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/><line x1="1" y1="1" x2="23" y2="23" stroke-width="2"/></svg>
+            <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+              <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" />
+              <circle cx="12" cy="12" r="3" />
+              <line x1="1" y1="1" x2="23" y2="23" stroke-width="2" />
+            </svg>
           </div>
           <h3>Screenshot Shield</h3>
           <p>Detects screen capture attempts and instantly hides your chat.</p>
@@ -101,7 +139,12 @@
 
         <div class="feature-card">
           <div class="feature-icon">
-            <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="10"/><path d="M8 14s1.5 2 4 2 4-2 4-2"/><line x1="9" y1="9" x2="9.01" y2="9"/><line x1="15" y1="9" x2="15.01" y2="9"/></svg>
+            <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+              <circle cx="12" cy="12" r="10" />
+              <path d="M8 14s1.5 2 4 2 4-2 4-2" />
+              <line x1="9" y1="9" x2="9.01" y2="9" />
+              <line x1="15" y1="9" x2="15.01" y2="9" />
+            </svg>
           </div>
           <h3>Groups & Channels</h3>
           <p>Create group chats with multiple Ghost IDs – all encrypted per member.</p>
@@ -115,35 +158,46 @@
       <div class="privacy-content">
         <h2 class="section-title">Built for Absolute Privacy</h2>
         <p class="privacy-subtitle">We believe your conversations are yours alone. Here's how we protect them:</p>
-        
+
         <div class="privacy-details">
           <div class="privacy-item">
             <div class="privacy-item-icon">
-              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
+              </svg>
             </div>
             <div class="privacy-item-text">
               <h4>Zero-Knowledge E2EE</h4>
-              <p>Every message is encrypted locally using AES-GCM and RSA-OAEP before leaving your device. Our servers only route encrypted blobs and never possess the keys to decrypt your data.</p>
-            </div>
-          </div>
-          
-          <div class="privacy-item">
-            <div class="privacy-item-icon">
-              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M2 12h4l2-9 4 18 2-9h4"/></svg>
-            </div>
-            <div class="privacy-item-text">
-              <h4>No Identity Tracking</h4>
-              <p>Unlike other platforms, Ghost Link requires no email, phone number, or social logins. You operate solely under a randomly generated Ghost ID, making you completely anonymous.</p>
+              <p>Every message is encrypted locally using AES-GCM and RSA-OAEP before leaving your device. Our servers
+                only route encrypted blobs and never possess the keys to decrypt your data.</p>
             </div>
           </div>
 
           <div class="privacy-item">
             <div class="privacy-item-icon">
-              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><line x1="3" y1="9" x2="21" y2="9"/><line x1="9" y1="21" x2="9" y2="9"/></svg>
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M2 12h4l2-9 4 18 2-9h4" />
+              </svg>
+            </div>
+            <div class="privacy-item-text">
+              <h4>No Identity Tracking</h4>
+              <p>Unlike other platforms, Ghost Link requires no email, phone number, or social logins. You operate
+                solely under a randomly generated Ghost ID, making you completely anonymous.</p>
+            </div>
+          </div>
+
+          <div class="privacy-item">
+            <div class="privacy-item-icon">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <rect x="3" y="3" width="18" height="18" rx="2" ry="2" />
+                <line x1="3" y1="9" x2="21" y2="9" />
+                <line x1="9" y1="21" x2="9" y2="9" />
+              </svg>
             </div>
             <div class="privacy-item-text">
               <h4>Screenshot Protection</h4>
-              <p>Our client detects screenshot attempts via OS level shortcuts or focus loss. If triggered, your chat is instantly hidden and your peer is securely alerted.</p>
+              <p>Our client detects screenshot attempts via OS level shortcuts or focus loss. If triggered, your chat is
+                instantly hidden and your peer is securely alerted.</p>
             </div>
           </div>
         </div>
@@ -163,32 +217,70 @@
 
       <div class="auth-card">
         <div class="auth-header">
-          <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2a7 7 0 0 0-7 7c0 3 1.5 5.5 3 7.5L12 22l4-5.5c1.5-2 3-4.5 3-7.5a7 7 0 0 0-7-7z"/><circle cx="12" cy="9" r="2.5"/></svg>
+          <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+            stroke-linecap="round" stroke-linejoin="round">
+            <path d="M12 2a7 7 0 0 0-7 7c0 3 1.5 5.5 3 7.5L12 22l4-5.5c1.5-2 3-4.5 3-7.5a7 7 0 0 0-7-7z" />
+            <circle cx="12" cy="9" r="2.5" />
+          </svg>
           <h2>Welcome to Ghost Link</h2>
           <p>Sign in to start a secure session</p>
         </div>
 
-        <!-- Ghost ID login -->
-        <div class="ghost-id-section">
-          <div class="input-group">
-            <svg class="input-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
-            <input id="ghostIdInput" type="text" placeholder="ghost_xxxxxx" class="auth-input" />
-          </div>
-          <div class="ghost-id-row">
-            <button class="roll-btn" onclick="rollGhostId()">
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg>
-              Roll
-            </button>
-            <button class="auth-submit ghost-submit" onclick="ghostIdLogin()">
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14"/><path d="M12 5l7 7-7 7"/></svg>
-              Enter as Ghost
-            </button>
-          </div>
+        <!-- Tab selector -->
+        <div class="tab-selector">
+          <button id="tabSignIn" class="tab active" onclick="switchAuthTab('signIn')">Sign In</button>
+          <button id="tabSignUp" class="tab" onclick="switchAuthTab('signUp')">Sign Up</button>
+        </div>
+
+        <!-- Sign In form -->
+        <div id="signInForm" class="auth-form">
+          <div class="input-group"><input id="emailSignIn" type="email" placeholder="Email" class="auth-input" /></div>
+          <div class="input-group"><input id="passwordSignIn" type="password" placeholder="Password"
+              class="auth-input" /></div>
+          <button class="auth-submit" onclick="emailLogin()">Sign In</button>
+        </div>
+
+        <!-- Sign Up form -->
+        <div id="signUpForm" class="auth-form hidden">
+          <div class="input-group"><input id="emailSignUp" type="email" placeholder="Email" class="auth-input" /></div>
+          <div class="input-group"><input id="passwordSignUp" type="password" placeholder="Password"
+              class="auth-input" /></div>
+          <button class="auth-submit" onclick="emailSignup()">Create Account</button>
+        </div>
+
+        <div class="divider-or"><span>or</span></div>
+
+        <!-- Google button -->
+        <div class="google-signin">
+          <div id="gsi-button"></div>
         </div>
 
         <p class="auth-back"><a href="#" onclick="switchView('viewLanding')">← Back to home</a></p>
       </div>
 
+    </div>
+  </div>
+
+  <!-- ========== 2.5 USERNAME SELECTION PAGE ========== -->
+  <div id="viewUsername" class="view hidden">
+    <div class="auth-wrapper">
+      <div class="auth-card">
+        <div class="auth-header">
+          <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+            stroke-linecap="round" stroke-linejoin="round">
+            <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
+            <circle cx="12" cy="7" r="4" />
+          </svg>
+          <h2>Choose your username</h2>
+          <p>Pick a unique username to identify yourself on Ghost Link.</p>
+        </div>
+        <div class="input-group">
+          <input id="usernameInput" type="text" placeholder="username" class="auth-input"
+            oninput="onUsernameInput(this.value)" />
+          <span id="usernameStatus" class="username-status"></span>
+        </div>
+        <button id="usernameSubmitBtn" class="auth-submit" onclick="claimUsername()" disabled>Claim Username</button>
+      </div>
     </div>
   </div>
 
@@ -199,27 +291,44 @@
       <!-- Sidebar -->
       <aside class="sidebar">
         <div class="sidebar-header">
-          <h2>Ghost Link</h2>
+          <div class="logo-container">
+            <img src="logo.png" class="sidebar-logo" alt="Ghost Link" />
+          </div>
           <button id="themeToggleSidebar" class="theme-toggle-sm" aria-label="Toggle theme">
-            <svg class="icon-sun" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>
-            <svg class="icon-moon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+            <svg class="icon-sun" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+              stroke-width="2">
+              <circle cx="12" cy="12" r="5" />
+              <line x1="12" y1="1" x2="12" y2="3" />
+              <line x1="12" y1="21" x2="12" y2="23" />
+              <line x1="4.22" y1="4.22" x2="5.64" y2="5.64" />
+              <line x1="18.36" y1="18.36" x2="19.78" y2="19.78" />
+              <line x1="1" y1="12" x2="3" y2="12" />
+              <line x1="21" y1="12" x2="23" y2="12" />
+              <line x1="4.22" y1="19.78" x2="5.64" y2="18.36" />
+              <line x1="18.36" y1="5.64" x2="19.78" y2="4.22" />
+            </svg>
+            <svg class="icon-moon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+              stroke-width="2">
+              <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z" />
+            </svg>
           </button>
         </div>
-        <div class="sidebar-user">
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="7" r="4"/><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/></svg>
-          <span id="myGhostIdDisplay">ghost_xxx</span>
-        </div>
-        <div class="search-container">
-          <input id="peerSearchInput" type="text" placeholder="Search Ghost ID..." class="search-input" />
-          <button onclick="searchAndAddPeer()" class="add-btn" title="Start direct chat">
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+        
+        <div class="sidebar-search-row">
+          <button id="profileBtn" class="sidebar-pfp-btn" onclick="profileModule.open()" title="View Profile">
+            <div id="sidebarAvatar" class="sidebar-avatar-sm"></div>
           </button>
+          <input id="peerSearchInput" type="text" placeholder="Search" class="search-input" autocomplete="off" />
         </div>
+        
         <ul id="chatsContainer" class="chat-list"></ul>
 
         <!-- Floating + FAB -->
         <button class="fab-btn" id="fabBtn" onclick="toggleGroupDialog()" title="New group">
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+            <line x1="12" y1="5" x2="12" y2="19" />
+            <line x1="5" y1="12" x2="19" y2="12" />
+          </svg>
         </button>
 
         <!-- Create Group Dialog -->
@@ -229,86 +338,739 @@
             <button onclick="toggleGroupDialog()" class="group-dialog-close">✕</button>
           </div>
           <input id="groupNameInput" type="text" placeholder="Group name..." class="group-dialog-input" />
-          <textarea id="groupBioInput" placeholder="Group bio (optional)..." class="group-dialog-input group-bio-input"></textarea>
-          <div class="group-member-row">
-            <input id="groupMemberInput" type="text" placeholder="Add Ghost ID..." class="group-dialog-input" style="flex:1;margin-bottom:0" />
+          <textarea id="groupBioInput" placeholder="Group bio (optional)..."
+            class="group-dialog-input group-bio-input"></textarea>
+          <div class="group-member-row" style="position:relative;">
+            <input id="groupMemberInput" type="text" placeholder="Add" class="group-dialog-input"
+              style="flex:1;margin-bottom:0" oninput="searchGroupMembers(this.value)" autocomplete="off" />
             <button onclick="addGroupMember()" class="group-add-member-btn">+</button>
+            <div id="groupMemberSuggestions" class="group-member-suggestions hidden"></div>
           </div>
           <ul id="groupMemberList" class="group-member-list"></ul>
           <button onclick="createGroupChat()" class="group-create-btn">Create Group</button>
         </div>
 
-        <button class="logout-btn" onclick="logout()">
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
-          Logout
-        </button>
+        <!-- Contact Profile Panel (Telegram-style right slide-in) -->
+        <div id="contactPanel" class="contact-panel">
+          <div class="contact-panel-inner">
+            <!-- Header bar -->
+            <div class="cp-topbar">
+              <button class="cp-back-btn" onclick="closeContactPanel()">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                  <line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/>
+                </svg>
+              </button>
+              <span class="cp-topbar-title">Contact Info</span>
+            </div>
+
+            <!-- Avatar + name banner -->
+            <div class="cp-hero">
+              <div id="cpAvatar" class="cp-avatar"></div>
+              <div class="cp-username" id="cpUsername">@username</div>
+            </div>
+
+            <!-- Notification toggle -->
+            <div class="cp-notif-row">
+              <div class="cp-notif-label">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/>
+                </svg>
+                Notifications
+              </div>
+              <label class="cp-toggle">
+                <input type="checkbox" id="cpNotifToggle" checked onchange="toggleContactNotif(this)" />
+                <span class="cp-toggle-slider"></span>
+              </label>
+            </div>
+
+            <!-- 4 stat tabs -->
+            <div class="cp-tabs">
+              <button class="cp-tab active" id="cpTab-media" onclick="switchCpTab('media')">
+                <span class="cp-tab-count" id="cpCount-media">0</span>
+                <span class="cp-tab-label">Media</span>
+              </button>
+              <button class="cp-tab" id="cpTab-links" onclick="switchCpTab('links')">
+                <span class="cp-tab-count" id="cpCount-links">0</span>
+                <span class="cp-tab-label">Links</span>
+              </button>
+              <button class="cp-tab" id="cpTab-docs" onclick="switchCpTab('docs')">
+                <span class="cp-tab-count" id="cpCount-docs">0</span>
+                <span class="cp-tab-label">Docs</span>
+              </button>
+              <button class="cp-tab" id="cpTab-groups" onclick="switchCpTab('groups')">
+                <span class="cp-tab-count" id="cpCount-groups">0</span>
+                <span class="cp-tab-label">Groups</span>
+              </button>
+            </div>
+
+            <!-- Tab content area -->
+            <div class="cp-content" id="cpContent">
+              <!-- Filled by JS -->
+            </div>
+          </div>
+        </div>
+
       </aside>
 
+
       <!-- Group Info Panel -->
-       <aside class="group-info-panel" id="groupInfoPanel">
-        <div class="gip-header">
-          <h3 id="gipName">Group</h3>
-          <button onclick="closeGroupInfo()" class="gip-close">✕</button>
+      <aside class="group-info-panel" id="groupInfoPanel">
+        <!-- Close Button & Edit Button Row -->
+        <div class="gip-top-actions">
+          <button onclick="closeGroupInfo()" class="gip-action-icon" title="Close">✕</button>
+          <div style="display: flex; gap: 8px;">
+            <button id="gipShareBtn" onclick="openShareModal()" class="gip-action-icon hidden" title="Share Group">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <circle cx="18" cy="5" r="3"/>
+                <circle cx="6" cy="12" r="3"/>
+                <circle cx="18" cy="19" r="3"/>
+                <line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/>
+                <line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/>
+              </svg>
+            </button>
+            <button id="gipEditBtn" onclick="openEditGroupModal()" class="gip-action-icon hidden" title="Edit Group">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M12 20h9"/>
+                <path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/>
+              </svg>
+            </button>
+          </div>
         </div>
+        
+        <!-- Centered Hero -->
+        <div class="gip-hero">
+          <div class="gip-hero-pfp" id="gipPfp"></div>
+          <h3 class="gip-hero-name" id="gipName">Group</h3>
+        </div>
+
         <p class="gip-bio" id="gipBio"></p>
         <div class="gip-meta">
           <span id="gipCreatedBy"></span>
           <span id="gipCreatedAt"></span>
         </div>
-        
-        <div class="gip-actions">
-          <button onclick="shareGroup()" class="gip-btn-outline">
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"/><polyline points="16 6 12 2 8 6"/><line x1="12" y1="2" x2="12" y2="15"/></svg>
-            Share Group
+        <div class="cp-tabs" style="margin-top: 16px; border-top: 1px solid var(--border); padding-top: 16px;">
+          <button class="cp-tab active" id="gipTab-members" onclick="switchGipTab('members')">
+            <span class="cp-tab-count" id="gipCount-members">0</span>
+            <span class="cp-tab-label">Members</span>
+          </button>
+          <button class="cp-tab" id="gipTab-media" onclick="switchGipTab('media')">
+            <span class="cp-tab-count" id="gipCount-media">0</span>
+            <span class="cp-tab-label">Media</span>
+          </button>
+          <button class="cp-tab" id="gipTab-links" onclick="switchGipTab('links')">
+            <span class="cp-tab-count" id="gipCount-links">0</span>
+            <span class="cp-tab-label">Links</span>
+          </button>
+          <button class="cp-tab" id="gipTab-docs" onclick="switchGipTab('docs')">
+            <span class="cp-tab-count" id="gipCount-docs">0</span>
+            <span class="cp-tab-label">Docs</span>
           </button>
         </div>
 
-        <div class="gip-add-member">
-          <input id="newGipMemberInput" type="text" placeholder="Add Ghost ID..." class="group-dialog-input" />
-          <button onclick="addNewMemberToGroup()" class="group-add-member-btn">+</button>
+        <div class="gip-content" id="gipContent">
+          <!-- Members Tab -->
+          <div id="gipView-members" class="gip-view active">
+            <div id="gipAddMemberWrap" class="gip-add-member-wrap hidden">
+              <div style="position:relative;">
+                <input id="gipAddMemberInput" type="text" placeholder="Search by username..." class="group-dialog-input" style="margin-bottom:8px" oninput="searchAddGroupMember(this.value)" autocomplete="off" />
+                <div id="gipAddMemberSuggestions" class="group-member-suggestions hidden"></div>
+              </div>
+              <button onclick="submitAddMember()" class="group-create-btn" style="padding: 8px; font-size: 0.8rem; margin-bottom: 12px;">Add Member</button>
+            </div>
+            <ul id="gipMemberList" class="gip-member-list"></ul>
+          </div>
+          
+          <!-- Media Tab -->
+          <div id="gipView-media" class="gip-view">
+            <div class="cp-media-grid" id="gipMediaGrid"></div>
+          </div>
+          
+          <!-- Links Tab -->
+          <div id="gipView-links" class="gip-view">
+            <div class="cp-links-list" id="gipLinksList"></div>
+          </div>
+          
+          <!-- Docs Tab -->
+          <div id="gipView-docs" class="gip-view">
+            <div class="cp-docs-list" id="gipDocsList"></div>
+          </div>
         </div>
-        <div class="gip-section-title">Members</div>
-        <ul id="gipMemberList" class="gip-member-list"></ul>
       </aside>
-      
-      <!-- Chat Window -->
-      <main class="chat-window" id="chatWindow">
+
+      <!-- Edit Group Dialog -->
+      <div class="edit-group-modal-overlay hidden" id="editGroupDialog">
+        <div class="group-dialog-header">
+          <span>Edit Group</span>
+          <button onclick="closeEditGroupModal()" class="group-dialog-close">✕</button>
+        </div>
+        
+        <div class="edit-group-pfp-wrap">
+          <div id="editGroupPfp" class="edit-group-pfp" onclick="triggerGroupPfpUpload()">
+            <div class="pfp-overlay">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/>
+                <circle cx="12" cy="13" r="4"/>
+              </svg>
+            </div>
+          </div>
+        </div>
+
+        <input id="editGroupNameInput" type="text" placeholder="Group name..." class="group-dialog-input" />
+        <textarea id="editGroupBioInput" placeholder="Group bio (optional)..." class="group-dialog-input group-bio-input"></textarea>
+        
+        <button onclick="submitGroupEdit()" class="group-create-btn">Save Changes</button>
+      </div>
+
+      <!-- Share Group Dialog -->
+      <div class="edit-group-modal-overlay hidden" id="shareGroupDialog">
+        <div class="group-dialog-header">
+          <span>Share Group</span>
+          <button onclick="closeShareModal()" class="group-dialog-close">✕</button>
+        </div>
+        <div class="group-dialog-body" style="text-align:center; padding:20px;">
+          <p style="color:var(--text-secondary); font-size:0.9rem; margin-bottom:16px;">Anyone with this link can join the group instantly.</p>
+          <textarea id="shareLinkInput" class="group-dialog-input" readonly style="margin-bottom:16px; font-family:monospace; font-size:0.8rem; background:var(--bg-secondary); color:var(--text-primary); cursor:pointer; resize:none; height:60px; line-height:1.4;" onclick="this.select()"></textarea>
+          <div style="display:flex; gap:12px;">
+            <button onclick="copyInviteLink()" class="group-create-btn" style="flex:1;">Copy Link</button>
+            <button id="shareResetBtn" onclick="resetInviteLink()" class="group-create-btn hidden" style="flex:1; background:var(--danger); color:white;">Reset Link</button>
+          </div>
+        </div>
+      </div>
+
+      <main class="chat-window no-chat-selected" id="chatWindow">
         <header class="chat-header" id="chatHeader" style="cursor:pointer" onclick="handleChatHeaderClick()">
-          <!-- Mobile back button -->
-          <button class="mobile-back-btn" onclick="closeMobileChat(); event.stopPropagation();">
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
-              <polyline points="15 18 9 12 15 6"/>
+          <button id="mobileBackBtn" class="mobile-back-btn" onclick="goBackToSidebar(event)"
+            aria-label="Back to chats">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
+              stroke-linecap="round" stroke-linejoin="round">
+              <line x1="19" y1="12" x2="5" y2="12" />
+              <polyline points="12 19 5 12 12 5" />
             </svg>
-            Back
           </button>
           <canvas id="roomPfpCanvas" class="pfp-canvas"></canvas>
           <div class="room-info">
             <h3 id="roomTitleDisplay">Select a chat</h3>
             <span class="secure-indicator">
-              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                <rect x="3" y="11" width="18" height="11" rx="2" ry="2" />
+                <path d="M7 11V7a5 5 0 0 1 10 0v4" />
+              </svg>
               End‑to‑end encrypted
             </span>
           </div>
         </header>
 
+        <!-- Pinned Message Bar -->
+        <div id="pinnedMessageBar" class="pinned-message-bar hidden">
+          <div class="pinned-bar-content" onclick="scrollToPinnedMessage()">
+            <div class="pinned-title">Pinned Message</div>
+            <div class="pinned-text" id="pinnedBarText"></div>
+          </div>
+          <button class="unpin-btn" onclick="unpinMessage()" title="Unpin">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+          </button>
+        </div>
+
         <section id="messagesGrid" class="messages"></section>
+
+        <!-- Reply Preview Bar -->
+        <div id="replyPreviewBar" class="reply-preview-bar hidden">
+          <div class="reply-preview-content">
+            <div class="reply-preview-title" id="replyPreviewTitle">Replying to...</div>
+            <div class="reply-preview-text" id="replyPreviewText">Message text</div>
+          </div>
+          <button class="reply-cancel-btn" onclick="cancelReply()" title="Cancel reply">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+          </button>
+        </div>
 
         <footer class="message-input">
           <label for="mediaAttachmentInput" class="attach-btn" title="Attach file">
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21.44 11.05l-9.19 9.19a6 6 0 0 1-8.49-8.49l9.19-9.19a4 4 0 0 1 5.66 5.66l-9.2 9.19a2 2 0 0 1-2.83-2.83l8.49-8.48"/></svg>
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M21.44 11.05l-9.19 9.19a6 6 0 0 1-8.49-8.49l9.19-9.19a4 4 0 0 1 5.66 5.66l-9.2 9.19a2 2 0 0 1-2.83-2.83l8.49-8.48" />
+            </svg>
           </label>
           <input type="file" id="mediaAttachmentInput" class="media-input" />
           <input id="chatMessageInput" type="text" placeholder="Write a message..." />
-          <button onclick="sendChatMessage()" class="send-btn" title="Send">
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
+          <!-- Emoji Picker Button -->
+          <button class="emoji-trigger-btn" id="emojiTriggerBtn" onclick="toggleEmojiPicker()" title="Emoji">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <circle cx="12" cy="12" r="10"/>
+              <path d="M8 14s1.5 2 4 2 4-2 4-2"/>
+              <line x1="9" y1="9" x2="9.01" y2="9"/>
+              <line x1="15" y1="9" x2="15.01" y2="9"/>
+            </svg>
           </button>
+          <button onclick="sendChatMessage()" class="send-btn" title="Send">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <line x1="22" y1="2" x2="11" y2="13" />
+              <polygon points="22 2 15 22 11 13 2 9 22 2" />
+            </svg>
+          </button>
+          <!-- Emoji Picker Panel -->
+          <div id="emojiPickerPanel" class="emoji-picker-panel hidden">
+            <div class="emoji-picker-search-row">
+              <input type="text" id="emojiSearchInput" class="emoji-search" placeholder="Search emoji..." oninput="filterEmojis(this.value)" />
+            </div>
+            <div class="emoji-category-tabs" id="emojiCategoryTabs"></div>
+            <div class="emoji-grid" id="emojiGrid"></div>
+          </div>
         </footer>
       </main>
 
     </div>
   </div>
 
+  <!-- Profile Drawer (Telegram‑style) -->
+  <div id="profileDrawer" class="profile-drawer">
+    <div class="profile-backdrop" onclick="profileModule.close()"></div>
+    <div class="profile-panel">
+      <div class="profile-panel-container" id="profilePanelContainer">
+
+        <!-- 1. MAIN SUBPANEL -->
+        <div class="profile-subpanel" id="subpanelMain">
+          <div class="profile-header">
+            <button class="profile-close-btn" onclick="profileModule.close()">✕</button>
+            <button class="profile-edit-btn" onclick="profileModule.slidePanel('username')" title="Edit Profile">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M12 20h9" />
+                <path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z" />
+              </svg>
+            </button>
+            <div class="profile-avatar-wrap">
+              <div id="drawerAvatarLg" class="profile-avatar-lg" onclick="profileModule.triggerPfpUpload()">
+                <div class="pfp-overlay">
+                  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z" />
+                    <circle cx="12" cy="13" r="4" />
+                  </svg>
+                </div>
+              </div>
+              <div class="profile-name" id="drawerUsername"></div>
+              <div class="profile-status"
+                style="font-size:0.78rem;color:rgba(255,255,255,0.6);margin-top:-6px;font-weight:500;">online</div>
+            </div>
+          </div>
+
+          <!-- Telegram Details -->
+          <div class="profile-details">
+            <div class="profile-detail-row" onclick="profileModule.copyDetail('username')"
+              title="Click to copy username">
+              <div class="profile-detail-icon">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <circle cx="12" cy="12" r="4" />
+                  <path d="M16 8v5a3 3 0 0 0 6 0v-1a10 10 0 1 0-3.92 7.94" />
+                </svg>
+              </div>
+              <div class="profile-detail-text">
+                <div class="profile-detail-val" id="detailUsername"></div>
+                <div class="profile-detail-lbl">Username</div>
+              </div>
+            </div>
+
+            <div class="profile-detail-row" onclick="profileModule.copyDetail('bio')" title="Click to copy bio">
+              <div class="profile-detail-icon">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <circle cx="12" cy="12" r="10" />
+                  <line x1="12" y1="16" x2="12" y2="12" />
+                  <line x1="12" y1="8" x2="12.01" y2="8" />
+                </svg>
+              </div>
+              <div class="profile-detail-text">
+                <div class="profile-detail-val" id="detailBio"></div>
+                <div class="profile-detail-lbl">Bio</div>
+              </div>
+            </div>
+          </div>
+
+          <div class="profile-settings">
+            <div class="settings-group">
+              <!-- Privacy Settings -->
+              <div class="settings-row" onclick="profileModule.slidePanel('privacy')">
+                <div class="settings-row-left">
+                  <div class="settings-row-icon">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                      <rect x="3" y="11" width="18" height="11" rx="2" ry="2" />
+                      <path d="M7 11V7a5 5 0 0 1 10 0v4" />
+                    </svg>
+                  </div>
+                  <div class="settings-row-text">
+                    <div class="settings-row-title">Privacy</div>
+                    <div class="settings-row-sub">Who can see your info</div>
+                  </div>
+                </div>
+                <div class="settings-arrow">›</div>
+              </div>
+
+              <!-- Support & FAQs -->
+              <div class="settings-row" onclick="profileModule.slidePanel('support')">
+                <div class="settings-row-left">
+                  <div class="settings-row-icon">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                      <circle cx="12" cy="12" r="10" />
+                      <path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3" />
+                      <line x1="12" y1="17" x2="12.01" y2="17" />
+                    </svg>
+                  </div>
+                  <div class="settings-row-text">
+                    <div class="settings-row-title">Support & FAQ</div>
+                    <div class="settings-row-sub">General help and queries</div>
+                  </div>
+                </div>
+                <div class="settings-arrow">›</div>
+              </div>
+            </div>
+
+            <div class="settings-separator"></div>
+
+            <div class="settings-row danger" onclick="logout()">
+              <div class="settings-row-left">
+                <div class="settings-row-icon">
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" />
+                    <polyline points="16 17 21 12 16 7" />
+                    <line x1="21" y1="12" x2="9" y2="12" />
+                  </svg>
+                </div>
+                <div class="settings-row-text">
+                  <div class="settings-row-title">Logout</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- 2. EDIT PROFILE SUBPANEL -->
+        <div class="profile-subpanel" id="subpanelUsername">
+          <div class="subpanel-header">
+            <button class="subpanel-back-btn" onclick="profileModule.slidePanel('main')">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                <line x1="19" y1="12" x2="5" y2="12" />
+                <polyline points="12 19 5 12 12 5" />
+              </svg>
+            </button>
+            <h3>Edit Profile</h3>
+          </div>
+          <div class="subpanel-content">
+            <p class="subpanel-desc">Update your custom username and biography details.</p>
+
+            <div class="settings-section-label" style="padding-left:0;padding-top:0;">Username</div>
+            <div class="input-group" style="margin-top: 4px; margin-bottom: 16px;">
+              <input type="text" id="changeUsernameInput" class="auth-input" placeholder="New username"
+                oninput="profileModule.checkUsername(this.value)" />
+              <span id="changeUsernameStatus" class="username-status"></span>
+            </div>
+
+            <div class="settings-section-label" style="padding-left:0;padding-top:0;">Biography</div>
+            <div class="input-group" style="margin-top: 4px; margin-bottom: 24px;">
+              <textarea id="editBioInput" class="bio-textarea" placeholder="Write a short bio..." maxlength="120"
+                style="margin-top:0;height:72px;"></textarea>
+            </div>
+
+            <button id="changeUsernameSubmitBtn" class="auth-submit" onclick="profileModule.submitProfileChanges()">
+              Save Changes
+            </button>
+          </div>
+        </div>
+
+        <!-- 3. PRIVACY SUBPANEL -->
+        <div class="profile-subpanel" id="subpanelPrivacy">
+          <div class="subpanel-header">
+            <button class="subpanel-back-btn" onclick="profileModule.slidePanel('main')">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                <line x1="19" y1="12" x2="5" y2="12" />
+                <polyline points="12 19 5 12 12 5" />
+              </svg>
+            </button>
+            <h3>Privacy Settings</h3>
+          </div>
+          <div class="profile-settings">
+            <div class="settings-group">
+              <!-- Profile Photo -->
+              <div class="settings-row">
+                <div class="settings-row-left">
+                  <div class="settings-row-icon" style="background:#e0f2fe;color:#0284c7;">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                      <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z" />
+                      <circle cx="12" cy="13" r="4" />
+                    </svg>
+                  </div>
+                  <div class="settings-row-text">
+                    <div class="settings-row-title">Profile Photo</div>
+                    <div class="settings-row-sub">Show to everyone</div>
+                  </div>
+                </div>
+                <label class="toggle-switch">
+                  <input type="checkbox" id="privPhoto"
+                    onchange="profileModule.savePrivacy('profilePhoto', this.checked ? 'everyone' : 'nobody')" />
+                  <span class="toggle-slider"></span>
+                </label>
+              </div>
+
+              <!-- Last Seen -->
+              <div class="settings-row">
+                <div class="settings-row-left">
+                  <div class="settings-row-icon" style="background:#d1fae5;color:#059669;">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                      <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" />
+                      <circle cx="12" cy="12" r="3" />
+                    </svg>
+                  </div>
+                  <div class="settings-row-text">
+                    <div class="settings-row-title">Last Seen</div>
+                    <div class="settings-row-sub">Show to everyone</div>
+                  </div>
+                </div>
+                <label class="toggle-switch">
+                  <input type="checkbox" id="privLastSeen"
+                    onchange="profileModule.savePrivacy('lastSeen', this.checked ? 'everyone' : 'nobody')" />
+                  <span class="toggle-slider"></span>
+                </label>
+              </div>
+
+              <!-- Online Status -->
+              <div class="settings-row">
+                <div class="settings-row-left">
+                  <div class="settings-row-icon" style="background:#f3e8ff;color:#7e22ce;">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                      <path d="M12 2a10 10 0 1 0 10 10A10 10 0 0 0 12 2zm0 18a8 8 0 1 1 8-8 8 8 0 0 1-8 8z" />
+                      <circle cx="12" cy="12" r="3" />
+                    </svg>
+                  </div>
+                  <div class="settings-row-text">
+                    <div class="settings-row-title">Online Status</div>
+                    <div class="settings-row-sub">Show when online</div>
+                  </div>
+                </div>
+                <label class="toggle-switch">
+                  <input type="checkbox" id="privOnline"
+                    onchange="profileModule.savePrivacy('onlineStatus', this.checked)" />
+                  <span class="toggle-slider"></span>
+                </label>
+              </div>
+
+              <!-- Read Receipts -->
+              <div class="settings-row">
+                <div class="settings-row-left">
+                  <div class="settings-row-icon" style="background:#fef3c7;color:#d97706;">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                      <polyline points="20 6 9 17 4 12" />
+                    </svg>
+                  </div>
+                  <div class="settings-row-text">
+                    <div class="settings-row-title">Read Receipts</div>
+                    <div class="settings-row-sub">Send read confirmation</div>
+                  </div>
+                </div>
+                <label class="toggle-switch">
+                  <input type="checkbox" id="privReceipts"
+                    onchange="profileModule.savePrivacy('readReceipts', this.checked)" />
+                  <span class="toggle-slider"></span>
+                </label>
+              </div>
+
+              <!-- Add to groups -->
+              <div class="settings-row">
+                <div class="settings-row-left">
+                  <div class="settings-row-icon" style="background:#fce7f3;color:#db2777;">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                      <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" />
+                      <circle cx="9" cy="7" r="4" />
+                      <path d="M23 21v-2a4 4 0 0 0-3-3.87" />
+                      <path d="M16 3.13a4 4 0 0 1 0 7.75" />
+                    </svg>
+                  </div>
+                  <div class="settings-row-text">
+                    <div class="settings-row-title">Add me to Groups</div>
+                    <div class="settings-row-sub">Allow everyone to add</div>
+                  </div>
+                </div>
+                <label class="toggle-switch">
+                  <input type="checkbox" id="privGroups"
+                    onchange="profileModule.savePrivacy('whoCanAddToGroups', this.checked ? 'everyone' : 'nobody')" />
+                  <span class="toggle-slider"></span>
+                </label>
+              </div>
+
+              <!-- Message forwarding -->
+              <div class="settings-row">
+                <div class="settings-row-left">
+                  <div class="settings-row-icon" style="background:#e0e7ff;color:#4f46e5;">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                      <line x1="22" y1="2" x2="11" y2="13" />
+                      <polygon points="22 2 15 22 11 13 2 9 22 2" />
+                    </svg>
+                  </div>
+                  <div class="settings-row-text">
+                    <div class="settings-row-title">Message Forwarding</div>
+                    <div class="settings-row-sub">Allow message copies</div>
+                  </div>
+                </div>
+                <label class="toggle-switch">
+                  <input type="checkbox" id="privForward"
+                    onchange="profileModule.savePrivacy('messageForwarding', this.checked)" />
+                  <span class="toggle-slider"></span>
+                </label>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- 4. SUPPORT SUBPANEL -->
+        <div class="profile-subpanel" id="subpanelSupport">
+          <div class="subpanel-header">
+            <button class="subpanel-back-btn" onclick="profileModule.slidePanel('main')">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                <line x1="19" y1="12" x2="5" y2="12" />
+                <polyline points="12 19 5 12 12 5" />
+              </svg>
+            </button>
+            <h3>Support & FAQ</h3>
+          </div>
+          <div class="subpanel-content">
+            <div class="faq-section">
+              <h4 class="faq-title">General FAQs</h4>
+              <div class="faq-item">
+                <div class="faq-question" onclick="this.nextElementSibling.classList.toggle('open')">
+                  <span>Is Ghost Link truly zero-knowledge?</span>
+                  <span class="faq-toggle">+</span>
+                </div>
+                <div class="faq-answer">
+                  <p>Yes. All chat channels are completely encrypted end-to-end on the client side using secure modern
+                    RSA-OAEP/AES-GCM handshakes. The servers only act as a relay and never see the key exchanges or
+                    decrypted text content.</p>
+                </div>
+              </div>
+              <div class="faq-item">
+                <div class="faq-question" onclick="this.nextElementSibling.classList.toggle('open')">
+                  <span>How do screenshot alerts work?</span>
+                  <span class="faq-toggle">+</span>
+                </div>
+                <div class="faq-answer">
+                  <p>Ghost Link listens to platform keystrokes and document blur handshakes. When a screenshot is taken,
+                    a notification is silently and automatically sent to your peer room instantly.</p>
+                </div>
+              </div>
+              <div class="faq-item">
+                <div class="faq-question" onclick="this.nextElementSibling.classList.toggle('open')">
+                  <span>What happens if I change my username?</span>
+                  <span class="faq-toggle">+</span>
+                </div>
+                <div class="faq-answer">
+                  <p>Your old username is instantly released so other users can register it. All active direct chats are
+                    mapped to the new username bundle immediately.</p>
+                </div>
+              </div>
+            </div>
+
+            <div class="support-separator"></div>
+
+            <div class="feedback-section">
+              <h4 class="faq-title">Send Feedback</h4>
+              <textarea id="feedbackTextarea" class="bio-textarea"
+                placeholder="Send us your questions or suggestions..."></textarea>
+              <button class="bio-save-btn" onclick="profileModule.sendFeedback()"
+                style="width:100%;margin-top:8px;">Send Feedback</button>
+            </div>
+
+            <div class="support-separator" style="margin-top:16px;"></div>
+
+            <div class="support-actions" style="margin-top: 16px;">
+              <button class="auth-submit" style="background:#ef4444;" onclick="profileModule.openDeleteModal()">
+                Delete Account
+              </button>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+  <!-- Delete Account Confirmation Modal -->
+  <div id="deleteAccountModal" class="custom-modal" style="display:none;">
+    <div class="custom-modal-backdrop" onclick="profileModule.closeDeleteModal()"></div>
+    <div class="custom-modal-content">
+      <h4 style="color:#ef4444;margin-top:0;font-size:1.1rem;font-weight:600;">Delete Account?</h4>
+      <p style="font-size:0.88rem;color:var(--text-secondary);margin:12px 0 20px;line-height:1.5;">
+        This action is permanent and cannot be undone. All your E2EE public keys, room registers, and chats will be instantly destroyed.
+      </p>
+      <div class="custom-modal-actions">
+        <button class="modal-btn-cancel" onclick="profileModule.closeDeleteModal()">Cancel</button>
+        <button class="modal-btn-danger" onclick="profileModule.confirmDeleteAccount()">Delete Permanently</button>
+      </div>
+    </div>
+  </div>
+
+  <input type="file" id="pfpFileInput" style="display:none" onchange="profileModule.handlePfpUpload(event)"
+    accept="image/*" />
+
+  <!-- Message Context Menu -->
+  <div id="msgContextMenu" class="msg-ctx-menu hidden">
+    <div class="msg-ctx-reactions" id="msgCtxReactions">
+      <div class="msg-ctx-quick-reactions">
+        <span class="ctx-reaction" onclick="sendReaction('❤️')">❤️</span>
+        <span class="ctx-reaction" onclick="sendReaction('👍')">👍</span>
+        <span class="ctx-reaction" onclick="sendReaction('👎')">👎</span>
+        <span class="ctx-reaction" onclick="sendReaction('🔥')">🔥</span>
+        <span class="ctx-reaction" onclick="sendReaction('🥰')">🥰</span>
+        <span class="ctx-reaction" onclick="sendReaction('👏')">👏</span>
+        <span class="ctx-reaction ctx-reaction-expand" onclick="toggleContextMenuEmojis(event)">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg>
+        </span>
+      </div>
+      <div class="msg-ctx-emoji-grid hidden" id="msgCtxEmojiGrid"></div>
+    </div>
+    <div class="msg-ctx-divider"></div>
+    <button class="msg-ctx-item" onclick="ctxReply()">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 17 4 12 9 7"/><path d="M20 18v-2a4 4 0 0 0-4-4H4"/></svg>
+      Reply
+    </button>
+    <button class="msg-ctx-item" onclick="ctxCopy()">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+      Copy
+    </button>
+    <button class="msg-ctx-item" onclick="ctxForward()">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 17 20 12 15 7"/><path d="M4 18v-2a4 4 0 0 1 4-4h12"/></svg>
+      Forward
+    </button>
+    <button class="msg-ctx-item" onclick="ctxPin()">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="17" x2="12" y2="22"/><path d="M5 17h14v-1.76a2 2 0 0 0-1.11-1.79l-1.78-.9A2 2 0 0 1 15 10.76V6h1a2 2 0 0 0 0-4H8a2 2 0 0 0 0 4h1v4.76a2 2 0 0 1-1.11 1.79l-1.78.9A2 2 0 0 0 5 15.24V17z"/></svg>
+      Pin
+    </button>
+    <button class="msg-ctx-item msg-ctx-delete" onclick="ctxDelete()">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14H6L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/><path d="M9 6V4h6v2"/></svg>
+      Delete
+    </button>
+  </div>
+
+  <!-- Pin Duration Modal -->
+  <div id="pinDurationModal" class="custom-modal hidden">
+    <div class="custom-modal-content pin-modal-content">
+      <h3 class="custom-modal-title">Pin Message</h3>
+      <p class="custom-modal-desc">Select how long this message should be pinned.</p>
+      
+      <div class="duration-btn-grid">
+        <button class="duration-btn" onclick="confirmPinMessage('4h')">4 Hours</button>
+        <button class="duration-btn" onclick="confirmPinMessage('10h')">10 Hours</button>
+        <button class="duration-btn" onclick="confirmPinMessage('24h')">24 Hours</button>
+      </div>
+      
+      <div class="custom-date-section">
+        <label>Or choose a custom expiration date:</label>
+        <input type="datetime-local" id="customPinDate" class="custom-date-picker" />
+        <button class="duration-btn custom-date-btn" onclick="confirmPinMessage('custom')">Set Custom Date</button>
+      </div>
+      
+      <div class="custom-modal-actions">
+        <button class="modal-btn-cancel" onclick="closePinModal()">Cancel</button>
+      </div>
+    </div>
+  </div>
+
   <script src="crypto.js"></script>
+  <script src="profile.js"></script>
   <script src="app.js"></script>
 </body>
+
 </html>
