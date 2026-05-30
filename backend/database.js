@@ -143,6 +143,24 @@ class BlindStorage {
     return this._serialize(chat);
   }
 
+  addMember(chatId, requesterId, newMemberId) {
+    const chat = this.chats.get(chatId);
+    if (!chat) throw new Error('Chat not found');
+    
+    // Security check: Must be a current member of the group to add someone else
+    if (!chat.members.has(requesterId)) {
+      throw new Error('Only current members can add new users');
+    }
+
+    if (chat.members.has(newMemberId)) {
+      throw new Error('User is already in this group');
+    }
+
+    chat.members.add(newMemberId);
+
+    return this._serialize(chat);
+  }
+
   // --- Encrypted Message Operations ---
   storeMessage({ chatId, senderId, encryptedPayload, recipientKeys }) {
     const message = {
