@@ -255,6 +255,60 @@ class GhostCrypto {
       ["encrypt", "decrypt"]
     );
   }
+  /** Persist key pairs to localStorage under a user-specific key */
+  async saveKeys(username) {
+    try {
+      const privEncJWK  = await window.crypto.subtle.exportKey('jwk', this.keyPairs.encryption.privateKey);
+      const pubEncJWK   = await window.crypto.subtle.exportKey('jwk', this.keyPairs.encryption.publicKey);
+      const privSignJWK = await window.crypto.subtle.exportKey('jwk', this.keyPairs.signing.privateKey);
+      const pubSignJWK  = await window.crypto.subtle.exportKey('jwk', this.keyPairs.signing.publicKey);
+      localStorage.setItem(`gl_keys_${username}`, JSON.stringify({
+        privEncJWK, pubEncJWK, privSignJWK, pubSignJWK
+      }));
+    } catch (e) {
+      console.warn('Could not persist keys:', e);
+    }
+  }
+
+  /** Load and restore key pairs from localStorage. Returns public JWKs on success, null if not found. */
+  async loadKeys(username) {
+    try {
+      const stored = localStorage.getItem(`gl_keys_${username}`);
+      if (!stored) return null;
+      const { privEncJWK, pubEncJWK, privSignJWK, pubSignJWK } = JSON.parse(stored);
+
+      const encPrivKey = await window.crypto.subtle.importKey(
+        'jwk', privEncJWK,
+        { name: 'RSA-OAEP', hash: 'SHA-256' },
+        true, ['decrypt', 'unwrapKey']
+      );
+      const encPubKey = await window.crypto.subtle.importKey(
+        'jwk', pubEncJWK,
+        { name: 'RSA-OAEP', hash: 'SHA-256' },
+        true, ['encrypt', 'wrapKey']
+      );
+      const signPrivKey = await window.crypto.subtle.importKey(
+        'jwk', privSignJWK,
+        { name: 'RSA-PSS', hash: 'SHA-256' },
+        true, ['sign']
+      );
+      const signPubKey = await window.crypto.subtle.importKey(
+        'jwk', pubSignJWK,
+        { name: 'RSA-PSS', hash: 'SHA-256' },
+        true, ['verify']
+      );
+
+      this.keyPairs = {
+        encryption: { privateKey: encPrivKey, publicKey: encPubKey },
+        signing:    { privateKey: signPrivKey, publicKey: signPubKey }
+      };
+
+      return { publicEncryptionJWK: pubEncJWK, publicSigningJWK: pubSignJWK };
+    } catch (e) {
+      console.warn('Could not restore keys:', e);
+      return null;
+    }
+  }
 }
 
 const cryptoEngine = new GhostCrypto();
