@@ -1,4 +1,8 @@
-# Ghost Link 👻
+<p align="center">
+  <img src="frontend/logo.png" alt="Ghost Link Logo" width="200" />
+</p>
+
+<h1 align="center">Ghost Link</h1>
 
 **Live Demo:** [https://ghostlink-5cmb.onrender.com/](https://ghostlink-5cmb.onrender.com/)
 
