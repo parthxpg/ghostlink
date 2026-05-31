@@ -158,8 +158,8 @@ body.no-scroll {
   gap: 12px;
 }
 
-.nav-logo-icon { 
-  color: var(--accent); 
+.nav-logo-icon {
+  color: var(--accent);
   width: 40px;
   height: 40px;
 }
@@ -1134,10 +1134,13 @@ body.no-scroll {
 .gip-action-promote { background: var(--accent-light); color: var(--accent); }
 .gip-action-kick { background: rgba(239,68,68,0.12); color: #ef4444; }
 
-.gip-delete-wrap {
+.gip-bottom-actions {
   padding: 16px;
   border-top: 1px solid var(--border);
   margin-top: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
 }
 
 .gip-delete-btn {
@@ -1980,7 +1983,7 @@ html:not(.no-scroll) {
   .chat-header {
     padding: 10px 16px;
   }
-  
+
   .pfp-canvas {
     width: 36px;
     height: 36px;
@@ -2013,7 +2016,7 @@ html:not(.no-scroll) {
     transform: translateX(100%);
     transition: transform 0.25s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.25s;
   }
-  
+
   .group-info-panel.open {
     opacity: 1;
     pointer-events: auto;
@@ -2826,3 +2829,52 @@ html:not(.no-scroll) {
   margin-bottom: 16px;
 }
 
+/* Light theme: make screenshot notification text dark */
+.system-msg-inner {
+  color: rgba(0, 0, 0, 0.45);
+}
+
+.system-msg-inner strong {
+  color: rgba(0, 0, 0, 0.75);
+}
+
+.system-msg-time {
+  color: rgba(0, 0, 0, 0.55);
+}
+
+/* Dark theme: restore original white tones */
+[data-theme="dark"] .system-msg-inner {
+  color: rgba(255, 255, 255, 0.38);
+}
+
+[data-theme="dark"] .system-msg-inner strong {
+  color: rgba(255, 255, 255, 0.82);
+}
+
+[data-theme="dark"] .system-msg-time {
+  color: rgba(255, 255, 255, 0.7);
+}
+
+@media (max-width: 992px) {
+  .landing-nav {
+    flex-direction: column;
+    align-items: center;
+    gap: 12px;
+    padding: 14px 20px;
+  }
+
+  .nav-right {
+    position: static;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    width: 100%;
+  }
+
+  .nav-cta {
+    flex: 1;
+    max-width: 200px;
+    text-align: center;
+  }
+}

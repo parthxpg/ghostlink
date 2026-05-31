@@ -218,7 +218,11 @@ class Database {
   async searchUsers(query) {
     if (!query) return [];
     const users = await User.find({ username: new RegExp(query, 'i'), pending: false }).limit(20);
-    return users.map(u => ({ username: u.username, randomId: u.username, pfpBase64: u.pfpBase64 }));
+    return users.map(u => {
+      const priv = u.privacySettings || this._defaultPrivacy();
+      const pfpBase64 = priv.profilePhoto === 'nobody' ? null : u.pfpBase64;
+      return { username: u.username, randomId: u.username, pfpBase64 };
+    });
   }
 
   async getProfile(id) {
@@ -269,9 +273,9 @@ class Database {
     const user = await User.findOne({ username: id });
     if (!user) return null;
     const priv = user.privacySettings || this._defaultPrivacy();
-    // If the user has hidden their profile photo, return null to callers
-    if (priv.profilePhoto === 'nobody') return null;
-    return { username: user.username, bio: user.bio, pfpBase64: user.pfpBase64 };
+    // If the user has hidden their profile photo, return it as null
+    const pfpBase64 = priv.profilePhoto === 'nobody' ? null : user.pfpBase64;
+    return { username: user.username, bio: user.bio, pfpBase64 };
   }
 
   // ── Chats ──────────────────────────────────────────────────────────────────
@@ -310,7 +314,18 @@ class Database {
 
   async getUserChats(id) {
     const chats = await Chat.find({ members: id });
-    return chats.map(c => this._plain(c));
+    const plainChats = [];
+    for (const c of chats) {
+      const plain = this._plain(c);
+      if (plain.type === 'direct') {
+        const peerId = plain.members.find(m => m !== id);
+        if (peerId) {
+          plain.peerProfile = await this.getPublicProfile(peerId);
+        }
+      }
+      plainChats.push(plain);
+    }
+    return plainChats;
   }
 
   async makeAdmin(chatId, requesterId, targetId) {
@@ -391,6 +406,29 @@ class Database {
     chat.admins = chat.admins.filter(a => a !== targetId);
     await chat.save();
     return this._plain(chat);
+  }
+
+  async leaveGroup(chatId, requesterId) {
+    const chat = await Chat.findOne({ id: chatId });
+    if (!chat) throw new Error('Chat not found');
+    if (chat.type !== 'group') throw new Error('Cannot leave a direct message');
+    if (!chat.members.includes(requesterId)) throw new Error('You are not in this group');
+    
+    // Remove the requester
+    chat.members = chat.members.filter(m => m !== requesterId);
+    chat.admins = chat.admins.filter(a => a !== requesterId);
+    
+    // If no members left, delete the group
+    if (chat.members.length === 0) {
+      await Message.deleteMany({ chatId });
+      await Chat.deleteOne({ id: chatId });
+      return { action: 'deleted', chatId };
+    }
+    
+    // If the creator leaves and someone else remains, maybe reassign creator? 
+    // We'll leave creator as is (even if they aren't in members) or we could just remove them.
+    await chat.save();
+    return { action: 'left', chat: this._plain(chat) };
   }
 
   async deleteGroup(chatId, requesterId) {

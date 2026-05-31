@@ -32,11 +32,7 @@
     <!-- Navbar -->
     <nav class="landing-nav">
       <div class="nav-left">
-        <svg class="nav-logo-icon" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-          stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-          <path d="M12 2a7 7 0 0 0-7 7c0 3 1.5 5.5 3 7.5L12 22l4-5.5c1.5-2 3-4.5 3-7.5a7 7 0 0 0-7-7z" />
-          <circle cx="12" cy="9" r="2.5" />
-        </svg>
+        <img src="logo.png" class="nav-logo-icon" alt="Ghost Link" />
         <span class="nav-logo-text">Ghost Link</span>
       </div>
       <div class="nav-right">
@@ -109,8 +105,8 @@
               <path d="M16 3.13a4 4 0 0 1 0 7.75" />
             </svg>
           </div>
-          <h3>Anonymous IDs</h3>
-          <p>No phone numbers. Get a random Ghost ID and start chatting instantly.</p>
+          <h3>Custom Usernames</h3>
+          <p>Choose a unique username and connect instantly. Your email remains completely private.</p>
         </div>
 
         <div class="feature-card">
@@ -180,9 +176,8 @@
               </svg>
             </div>
             <div class="privacy-item-text">
-              <h4>No Identity Tracking</h4>
-              <p>Unlike other platforms, Ghost Link requires no email, phone number, or social logins. You operate
-                solely under a randomly generated Ghost ID, making you completely anonymous.</p>
+              <h4>Private Identity</h4>
+              <p>Ghost Link uses secure email authentication to keep your account safe, but your email is never shared with anyone. You operate solely under your chosen username, keeping your true identity protected.</p>
             </div>
           </div>
 
@@ -217,11 +212,7 @@
 
       <div class="auth-card">
         <div class="auth-header">
-          <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
-            stroke-linecap="round" stroke-linejoin="round">
-            <path d="M12 2a7 7 0 0 0-7 7c0 3 1.5 5.5 3 7.5L12 22l4-5.5c1.5-2 3-4.5 3-7.5a7 7 0 0 0-7-7z" />
-            <circle cx="12" cy="9" r="2.5" />
-          </svg>
+          <img src="logo.png" style="width:48px; height:48px; margin-bottom:8px;" alt="Ghost Link" />
           <h2>Welcome to Ghost Link</h2>
           <p>Sign in to start a secure session</p>
         </div>
@@ -496,9 +487,18 @@
           </div>
         </div>
 
-        <!-- Delete Group (owner only) -->
-        <div id="gipDeleteWrap" class="gip-delete-wrap hidden">
-          <button id="gipDeleteBtn" onclick="deleteGroup()" class="gip-delete-btn">
+        <!-- Bottom Actions (Leave / Delete) -->
+        <div class="gip-bottom-actions">
+          <button id="gipLeaveBtn" onclick="leaveGroup()" class="gip-delete-btn" style="color:var(--text-primary); border-color:var(--border);">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>
+              <polyline points="16 17 21 12 16 7"></polyline>
+              <line x1="21" y1="12" x2="9" y2="12"></line>
+            </svg>
+            Leave Group
+          </button>
+          
+          <button id="gipDeleteBtn" onclick="deleteGroup()" class="gip-delete-btn hidden">
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
               <polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/>
               <line x1="10" y1="11" x2="10" y2="17"/><line x1="14" y1="11" x2="14" y2="17"/>
@@ -818,67 +818,7 @@
                 </label>
               </div>
 
-              <!-- Last Seen -->
-              <div class="settings-row">
-                <div class="settings-row-left">
-                  <div class="settings-row-icon" style="background:#d1fae5;color:#059669;">
-                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                      <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" />
-                      <circle cx="12" cy="12" r="3" />
-                    </svg>
-                  </div>
-                  <div class="settings-row-text">
-                    <div class="settings-row-title">Last Seen</div>
-                    <div class="settings-row-sub">Show to everyone</div>
-                  </div>
-                </div>
-                <label class="toggle-switch">
-                  <input type="checkbox" id="privLastSeen"
-                    onchange="profileModule.savePrivacy('lastSeen', this.checked ? 'everyone' : 'nobody')" />
-                  <span class="toggle-slider"></span>
-                </label>
-              </div>
 
-              <!-- Online Status -->
-              <div class="settings-row">
-                <div class="settings-row-left">
-                  <div class="settings-row-icon" style="background:#f3e8ff;color:#7e22ce;">
-                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                      <path d="M12 2a10 10 0 1 0 10 10A10 10 0 0 0 12 2zm0 18a8 8 0 1 1 8-8 8 8 0 0 1-8 8z" />
-                      <circle cx="12" cy="12" r="3" />
-                    </svg>
-                  </div>
-                  <div class="settings-row-text">
-                    <div class="settings-row-title">Online Status</div>
-                    <div class="settings-row-sub">Show when online</div>
-                  </div>
-                </div>
-                <label class="toggle-switch">
-                  <input type="checkbox" id="privOnline"
-                    onchange="profileModule.savePrivacy('onlineStatus', this.checked)" />
-                  <span class="toggle-slider"></span>
-                </label>
-              </div>
-
-              <!-- Read Receipts -->
-              <div class="settings-row">
-                <div class="settings-row-left">
-                  <div class="settings-row-icon" style="background:#fef3c7;color:#d97706;">
-                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                      <polyline points="20 6 9 17 4 12" />
-                    </svg>
-                  </div>
-                  <div class="settings-row-text">
-                    <div class="settings-row-title">Read Receipts</div>
-                    <div class="settings-row-sub">Send read confirmation</div>
-                  </div>
-                </div>
-                <label class="toggle-switch">
-                  <input type="checkbox" id="privReceipts"
-                    onchange="profileModule.savePrivacy('readReceipts', this.checked)" />
-                  <span class="toggle-slider"></span>
-                </label>
-              </div>
 
               <!-- Add to groups -->
               <div class="settings-row">

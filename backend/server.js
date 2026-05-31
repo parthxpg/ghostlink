@@ -309,6 +309,23 @@ app.post('/api/chats/:chatId/delete', async (req, res) => {
   }
 });
 
+app.post('/api/chats/:chatId/leave', async (req, res) => {
+  const { requesterId } = req.body;
+  try {
+    const result = await db.leaveGroup(req.params.chatId, requesterId);
+    if (result.action === 'deleted') {
+      // Group was empty and deleted
+      return res.json({ success: true, deleted: true });
+    } else {
+      // Broadcast update to remaining members and the member who left (so they know they left)
+      broadcastToMembers([...result.chat.members, requesterId], 'group_updated', { ...result.chat, kickedId: requesterId });
+      return res.json({ success: true, chat: result.chat });
+    }
+  } catch (err) {
+    return res.status(403).json({ error: err.message });
+  }
+});
+
 // ════════════════════════════════════════════════════════════════════════════════
 //  SOCKET.IO
 // ════════════════════════════════════════════════════════════════════════════════

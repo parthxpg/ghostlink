@@ -806,7 +806,7 @@ async function openUserInfo(chat) {
   // Set avatar
   const avatarEl = document.getElementById('cpAvatar');
   if (typeof profileModule !== 'undefined') {
-    profileModule.applyAvatar(avatarEl, peerId, null);
+    profileModule.applyAvatar(avatarEl, peerId, chat.peerProfile?.pfpBase64);
   } else {
     avatarEl.textContent = peerId.substring(0, 2).toUpperCase();
     avatarEl.style.background = '#229ed9';
@@ -1001,13 +1001,14 @@ function openGroupInfo(chat) {
 
   const isOwner = chat.createdBy === myGhostId;
   const editBtn = document.getElementById('gipEditBtn');
-  const deleteWrap = document.getElementById('gipDeleteWrap');
+  const deleteBtn = document.getElementById('gipDeleteBtn');
+  
   if (isOwner) {
     editBtn.classList.remove('hidden');
-    if(deleteWrap) deleteWrap.classList.remove('hidden');
+    if (deleteBtn) deleteBtn.classList.remove('hidden');
   } else {
     editBtn.classList.add('hidden');
-    if(deleteWrap) deleteWrap.classList.add('hidden');
+    if (deleteBtn) deleteBtn.classList.add('hidden');
   }
 
   const shareBtn = document.getElementById('gipShareBtn');
@@ -1070,6 +1071,27 @@ async function deleteGroup() {
     document.getElementById('roomTitleDisplay').textContent = 'Select a chat';
     loadActiveChats();
     showToast('Group deleted successfully');
+  } catch (err) {
+    showToast(err.message, 'error');
+  }
+}
+
+async function leaveGroup() {
+  if (!currentGroupInfo) return;
+  const chat = currentGroupInfo;
+  if (!confirm(`Leave "${chat.name}"? You will no longer receive messages from this group.`)) return;
+  try {
+    const res = await fetch(`${API_URL}/api/chats/${chat.id}/leave`, {
+      method: 'POST',
+      headers: getAuthHeaders(),
+      body: JSON.stringify({ requesterId: myGhostId })
+    });
+    if (!res.ok) {
+      const err = await res.json();
+      throw new Error(err.error || 'Failed to leave group');
+    }
+    // Note: The server will broadcast 'group_updated' with our ID in kickedId, 
+    // which our socket handler already treats as being removed!
   } catch (err) {
     showToast(err.message, 'error');
   }
@@ -1246,8 +1268,10 @@ async function loadActiveChats() {
       const unreadBadge = unreadCount > 0 ? `<span class="chat-unread-badge">${unreadCount}</span>` : '';
 
       let avatarHtml = '';
-      if (chat.type !== 'direct' && chat.pfpBase64) {
-        avatarHtml = `<div class="chat-item-avatar"><img src="${chat.pfpBase64}" style="width:100%;height:100%;border-radius:50%;object-fit:cover;"></div>`;
+      const pfpBase64 = chat.type === 'direct' ? (chat.peerProfile?.pfpBase64) : chat.pfpBase64;
+      
+      if (pfpBase64) {
+        avatarHtml = `<div class="chat-item-avatar"><img src="${pfpBase64}" style="width:100%;height:100%;border-radius:50%;object-fit:cover;"></div>`;
       } else {
         const avatarColor = chat.type === 'direct' ?
           profileModule.avatarColor(title || '?') :
@@ -1310,7 +1334,9 @@ async function openChatRoom(chatId) {
     canvas.width = size;
     canvas.height = size;
 
-    if (chat.type !== 'direct' && chat.pfpBase64) {
+    const pfpBase64 = chat.type === 'direct' ? (chat.peerProfile?.pfpBase64) : chat.pfpBase64;
+
+    if (pfpBase64) {
       const img = new Image();
       img.onload = () => {
         ctx.clearRect(0, 0, size, size);
@@ -1321,7 +1347,7 @@ async function openChatRoom(chatId) {
         ctx.drawImage(img, 0, 0, size, size);
         ctx.restore();
       };
-      img.src = chat.pfpBase64;
+      img.src = pfpBase64;
     } else {
       const avatarColor = profileModule.avatarColor(title || '?');
       const initials = profileModule.initials(title || '?');
