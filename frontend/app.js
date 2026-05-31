@@ -1725,6 +1725,19 @@ function renderForwardTargets(query) {
 function submitForwardTarget(chatId) {
   if (!pendingForwardMessageId || !pendingForwardOwnerId) return;
   activeForwardRequest = { messageId: pendingForwardMessageId, ownerId: pendingForwardOwnerId, receiverId: chatId };
+  
+  if (pendingForwardOwnerId === myGhostId) {
+    // Forwarding our own message: no need to ask ourselves over the network!
+    const aesKey = rawMessageKeys.get(pendingForwardMessageId);
+    if (aesKey) {
+      forwardMessageToTarget(pendingForwardMessageId, chatId, aesKey);
+    } else {
+      showToast('Message key missing from cache', 'error');
+    }
+    closeForwardDialog();
+    return;
+  }
+
   socket.emit('request_forward', {
     messageId: pendingForwardMessageId,
     ownerId: pendingForwardOwnerId,
@@ -1747,11 +1760,29 @@ function showForwardBanner(data) {
 }
 
 async function approveForward(data) {
-  const aesKey = rawMessageKeys.get(data.messageId);
+  let aesKey = rawMessageKeys.get(data.messageId);
+  
   if (!aesKey) {
-    showToast('Message key missing from cache', 'error');
+    try {
+      const res = await fetch(`${API_URL}/api/messages/${data.messageId}`, { headers: getAuthHeaders() });
+      if (res.ok) {
+        const msg = await res.json();
+        const wrappedKey = msg.recipientKeys[myGhostId];
+        if (wrappedKey) {
+           aesKey = await cryptoEngine.unwrapMessageKey(wrappedKey);
+        }
+      }
+    } catch (err) {
+      console.error('Failed to fetch msg for forwarding', err);
+    }
+  }
+
+  if (!aesKey) {
+    showToast('Failed to retrieve message key for forwarding', 'error');
+    socket.emit('forward_decision', { requestId: data.requestId, decision: 'denied' });
     return;
   }
+
   let requesterPub = null;
   if (peerKeys.has(data.requesterId)) {
     requesterPub = peerKeys.get(data.requesterId).publicEncryptionJWK;

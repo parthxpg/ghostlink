@@ -461,6 +461,10 @@ class Database {
     return false;
   }
 
+  async getMessage(messageId) {
+    return this._plain(await Message.findOne({ id: messageId }));
+  }
+
   async pinMessage(chatId, requesterId, pinData) {
     const chat = await Chat.findOne({ id: chatId });
     if (!chat) throw new Error('Chat not found');

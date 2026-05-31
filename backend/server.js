@@ -233,6 +233,14 @@ app.get('/api/chats/:chatId/messages', async (req, res) => {
   return res.json(await db.getChatMessages(req.params.chatId));
 });
 
+app.get('/api/messages/:messageId', verifyToken, async (req, res) => {
+  const msg = await db.getMessage(req.params.messageId);
+  if (!msg) return res.status(404).json({ error: 'Message not found' });
+  const chat = await db.getChat(msg.chatId);
+  if (!chat || !chat.members.includes(req.userId)) return res.status(403).json({ error: 'Access denied' });
+  return res.json(msg);
+});
+
 app.post('/api/chats/:chatId/admin', async (req, res) => {
   const { requesterId, targetId } = req.body;
   try {
