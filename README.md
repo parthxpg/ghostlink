@@ -1,27 +1,27 @@
 # Ghost Link 👻
 
-A privacy-focused encrypted messaging platform built for people who actually care about their data. No phone numbers. No data mining. Just end-to-end encrypted conversations under a random Ghost ID.
+**Live Demo:** [https://ghostlink-5cmb.onrender.com/](https://ghostlink-5cmb.onrender.com/)
+
+A high-performance, zero-knowledge messaging platform engineered for minimum latency via persistent WebSockets. Ghost Link delivers state-of-the-art End-to-End Encryption (E2EE) and granular, cryptographic privacy controls without compromising on real-time speed or user experience. No phone numbers. No data mining. Just totally secure conversations under a random Ghost ID.
 
 ---
 
 ## What is this?
 
-Ghost Link is a real-time chat app where everything is encrypted on your device before it ever touches the server. We can't read your messages. Nobody can. The server just relays sealed envelopes — it never sees what's inside.
-
-Built during a 48-hour hackathon.
+Ghost Link is a low-latency, decentralized-identity secure communication protocol. We leverage WebSockets for real-time bi-directional data transfer, protected by a zero-knowledge E2EE architecture utilizing client-side key exchange and AES-GCM payload wrapping. This ensures absolute data sovereignty and cryptographic privacy. The server acts merely as a blind router — it never sees what's inside your messages.
 
 ---
 
 ## Features
 
-- **Zero-Knowledge E2EE** — RSA + AES encryption handled entirely client-side using the Web Crypto API. The server stores only encrypted blobs.
+- **Zero-Knowledge E2EE** — Encryption handled entirely client-side using the Web Crypto API. The server stores only encrypted blobs.
 - **Anonymous Ghost IDs** — No email, no phone number required. Roll a random ID and you're in.
-- **Real-Time Messaging** — WebSocket-powered via Socket.io. Messages arrive instantly.
-- **Encrypted Media Sharing** — Images and files are encrypted as base64 before they leave your browser.
+- **Ultra-Low Latency** — WebSocket-powered via Socket.io. Messages arrive instantly.
+- **Granular Privacy Controls** — Control who sees your profile, your last seen status, and who can add you to groups.
+- **Secure Forwarding** — Cryptographically enforced forwarding. If you disable forwarding in your privacy settings, the cryptographic handshakes required to forward your message are automatically denied. 
 - **Screenshot Shield** — Detects PrintScreen, Cmd+Shift+3/4, and window blur events. Instantly hides the chat and alerts your peer.
-- **Consent-Based Forwarding** — Want to forward a message? The original sender has to approve it first. Cryptographically enforced.
-- **Group Chats** — Supports multi-member rooms with per-member key wrapping.
-- **Dark Mode** — Because obviously.
+- **Group Chats with Admin Roles** — Supports multi-member rooms with per-member key wrapping, complete with group bios and moderation roles (kicking/deleting).
+- **Encrypted Media Sharing** — Images and files are encrypted as base64 before they leave your browser.
 
 ---
 
@@ -32,30 +32,44 @@ Built during a 48-hour hackathon.
 | Frontend | HTML, CSS, Vanilla JS, Web Crypto API |
 | Backend | Node.js, Express |
 | Real-time | Socket.io |
-| Crypto | RSA-OAEP + AES-GCM (via WebCrypto) |
-| Storage | In-memory / SQLite (via `database.js`) |
+| Crypto | RSA-OAEP + AES-GCM (via WebCrypto API) |
+| Storage | MongoDB Atlas (via Mongoose) |
 
 ---
 
 ## Getting Started
 
+Ghost Link is built as a monolith where the Node.js backend automatically hosts and serves the frontend. **You do not need to deploy the frontend separately.**
+
 ### Prerequisites
 
 - Node.js v18+
 - npm
+- A MongoDB cluster URL
 
 ### Installation
 
+1. Clone the repository:
 ```bash
-git clone https://github.com/parthxpg/ghost-link.git
-cd ghost-link/backend
+git clone https://github.com/parthxpg/ghostlink.git
+cd ghostlink/backend
+```
+
+2. Install dependencies:
+```bash
 npm install
 ```
 
-### Run the server
+3. Setup your environment variables in a `.env` file in the `backend` folder:
+```env
+MONGO_URI=your_mongodb_connection_string
+JWT_SECRET=your_jwt_secret
+```
+
+### Run the server locally
 
 ```bash
-node server.js
+npm run dev
 ```
 
 Then open your browser and go to `http://localhost:3000`.
@@ -64,39 +78,28 @@ Then open your browser and go to `http://localhost:3000`.
 
 ## How It Works
 
-1. When you log in, your browser generates an RSA key pair locally.
+1. When you log in, your browser generates a cryptographic key pair locally.
 2. The **public key** is registered on the server. The **private key never leaves your device**.
-3. When you send a message, a fresh AES key is generated, used to encrypt the message, then the AES key itself is wrapped with each recipient's RSA public key.
+3. When you send a message, a fresh AES symmetric key is generated. This key is used to encrypt the message, and then the AES key itself is wrapped (encrypted) with each recipient's public key.
 4. The server stores the encrypted payload + wrapped keys. It cannot decrypt either.
-5. On the receiving end, the recipient uses their private RSA key to unwrap the AES key, then decrypts the message.
-
-The forwarding system works the same way — if Alice wants to forward Bob's message to Charlie, Bob gets a prompt, and only if Bob approves does Alice receive a re-wrapped key to do the forward.
+5. On the receiving end, the recipient uses their local private key to unwrap the AES key, and then decrypts the actual message.
 
 ---
 
 ## Project Structure
 
 ```
-ghost-link/
+ghostlink/
 ├── frontend/
 │   ├── index.html
 │   ├── app.js        # UI logic, socket handling, chat flows
 │   ├── crypto.js     # All cryptographic operations
 │   └── styles.css
 ├── backend/
-│   ├── server.js     # Express + Socket.io server
-│   ├── database.js   # In-memory data layer
+│   ├── server.js     # Express + Socket.io server (also serves frontend static files)
+│   ├── database.js   # MongoDB data layer
 │   └── package.json
 ```
-
----
-
-## Known Limitations
-
-- Private keys are stored in memory only — refreshing the page means you lose access to old messages (by design, honestly).
-- Screenshot detection is best-effort on desktop browsers. Mobile is limited.
-- Google login is currently a mock — it generates a Ghost ID from a random suffix. OAuth not wired up yet.
-- No message persistence across sessions (zero-knowledge tradeoff).
 
 ---
 
