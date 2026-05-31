@@ -393,6 +393,17 @@ class Database {
     return this._plain(chat);
   }
 
+  async deleteGroup(chatId, requesterId) {
+    const chat = await Chat.findOne({ id: chatId });
+    if (!chat) throw new Error('Chat not found');
+    if (chat.type !== 'group') throw new Error('Cannot delete a direct message');
+    if (chat.createdBy !== requesterId) throw new Error('Only the group creator can delete the group');
+    const members = [...chat.members];
+    await Message.deleteMany({ chatId });
+    await Chat.deleteOne({ id: chatId });
+    return { members, chatId };
+  }
+
   async pinMessage(chatId, requesterId, pinData) {
     const chat = await Chat.findOne({ id: chatId });
     if (!chat) throw new Error('Chat not found');

@@ -298,6 +298,17 @@ app.post('/api/chats/:chatId/kick', async (req, res) => {
   }
 });
 
+app.post('/api/chats/:chatId/delete', async (req, res) => {
+  const { requesterId } = req.body;
+  try {
+    const { members, chatId } = await db.deleteGroup(req.params.chatId, requesterId);
+    broadcastToMembers(members, 'group_deleted', { chatId });
+    return res.json({ success: true });
+  } catch (err) {
+    return res.status(403).json({ error: err.message });
+  }
+});
+
 // ════════════════════════════════════════════════════════════════════════════════
 //  SOCKET.IO
 // ════════════════════════════════════════════════════════════════════════════════

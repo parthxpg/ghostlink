@@ -499,6 +499,22 @@ function initializeSocket() {
     loadActiveChats();
   });
 
+  socket.on('group_deleted', data => {
+    const { chatId } = data;
+    activeChats = activeChats.filter(c => c.id !== chatId);
+    if (selectedRoomId === chatId) {
+      selectedRoomId = null;
+      const chatWindow = document.getElementById('chatWindow');
+      if (chatWindow) chatWindow.classList.add('no-chat-selected');
+      document.body.classList.remove('chat-open');
+      document.getElementById('messagesGrid').innerHTML = '';
+      document.getElementById('roomTitleDisplay').textContent = 'Select a chat';
+      closeGroupInfo();
+    }
+    showToast('Group has been deleted', 'error');
+    loadActiveChats();
+  });
+
   socket.on('forward_approval_needed', data => showForwardBanner(data));
   socket.on('forward_decision_received', async data => {
     if (data.decision === 'approved') {
@@ -985,8 +1001,14 @@ function openGroupInfo(chat) {
 
   const isOwner = chat.createdBy === myGhostId;
   const editBtn = document.getElementById('gipEditBtn');
-  if (isOwner) editBtn.classList.remove('hidden');
-  else editBtn.classList.add('hidden');
+  const deleteWrap = document.getElementById('gipDeleteWrap');
+  if (isOwner) {
+    editBtn.classList.remove('hidden');
+    if(deleteWrap) deleteWrap.classList.remove('hidden');
+  } else {
+    editBtn.classList.add('hidden');
+    if(deleteWrap) deleteWrap.classList.add('hidden');
+  }
 
   const shareBtn = document.getElementById('gipShareBtn');
   if (isAdmin) shareBtn.classList.remove('hidden');
@@ -1019,6 +1041,38 @@ function openGroupInfo(chat) {
 function closeGroupInfo() {
   document.getElementById('groupInfoPanel').classList.remove('open');
   currentGroupInfo = null;
+}
+
+async function deleteGroup() {
+  if (!currentGroupInfo) return;
+  const chat = currentGroupInfo;
+  if (chat.createdBy !== myGhostId) {
+    showToast('Only the group creator can delete this group', 'error');
+    return;
+  }
+  if (!confirm(`Delete "${chat.name}"? This will permanently remove all messages and cannot be undone.`)) return;
+  try {
+    const res = await fetch(`${API_URL}/api/chats/${chat.id}/delete`, {
+      method: 'POST',
+      headers: getAuthHeaders(),
+      body: JSON.stringify({ requesterId: myGhostId })
+    });
+    if (!res.ok) {
+      const err = await res.json();
+      throw new Error(err.error || 'Failed to delete group');
+    }
+    closeGroupInfo();
+    selectedRoomId = null;
+    const chatWindow = document.getElementById('chatWindow');
+    if (chatWindow) chatWindow.classList.add('no-chat-selected');
+    document.body.classList.remove('chat-open');
+    document.getElementById('messagesGrid').innerHTML = '';
+    document.getElementById('roomTitleDisplay').textContent = 'Select a chat';
+    loadActiveChats();
+    showToast('Group deleted successfully');
+  } catch (err) {
+    showToast(err.message, 'error');
+  }
 }
 
 function openEditGroupModal() {
