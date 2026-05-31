@@ -442,6 +442,25 @@ class Database {
     return { members, chatId };
   }
 
+  async deleteMessage(messageId, requesterId) {
+    const msg = await Message.findOne({ id: messageId });
+    if (!msg) return false;
+    
+    let allowed = (msg.senderId === requesterId);
+    if (!allowed) {
+      const chat = await Chat.findOne({ id: msg.chatId });
+      if (chat && chat.type === 'group' && chat.admins && chat.admins.includes(requesterId)) {
+        allowed = true; // group admins can delete any message
+      }
+    }
+    
+    if (allowed) {
+      await Message.deleteOne({ id: messageId });
+      return { success: true, chatId: msg.chatId };
+    }
+    return false;
+  }
+
   async pinMessage(chatId, requesterId, pinData) {
     const chat = await Chat.findOne({ id: chatId });
     if (!chat) throw new Error('Chat not found');

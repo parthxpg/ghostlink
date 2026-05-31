@@ -472,6 +472,18 @@ function initializeSocket() {
     loadActiveChats();
   });
 
+  socket.on('message_deleted', ({ messageId }) => {
+    const el = document.querySelector(`.message[data-msg-id="${messageId}"]`);
+    if (el) {
+      el.style.transition = 'opacity 0.3s, transform 0.3s';
+      el.style.opacity = '0';
+      el.style.transform = 'scale(0.9)';
+      setTimeout(() => el.remove(), 300);
+    }
+    decryptedMessages.delete(messageId);
+    if (typeof rawMessageKeys !== 'undefined') rawMessageKeys.delete(messageId);
+  });
+
   socket.on('group_updated', updatedChat => {
     // Update local chat cache
     const idx = activeChats.findIndex(c => c.id === updatedChat.id);
@@ -2403,9 +2415,8 @@ function scrollToPinnedMessage() {
 
 function ctxDelete() {
   if (_ctxMsgId) {
-    const el = document.querySelector(`.message[data-msg-id="${_ctxMsgId}"]`);
-    if (el) el.remove();
-    showToast('Message removed from view', 'info');
+    socket.emit('delete_message', { messageId: _ctxMsgId });
+    showToast('Attempting to delete message...', 'info');
   }
   document.getElementById('msgContextMenu').classList.add('hidden');
 }

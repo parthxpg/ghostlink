@@ -357,6 +357,21 @@ io.on('connection', (socket) => {
     }
   });
 
+  socket.on('delete_message', async ({ messageId }) => {
+    if (!userSessionId || !messageId) return;
+    try {
+      const result = await db.deleteMessage(messageId, userSessionId);
+      if (result && result.success) {
+        const chat = await db.getChat(result.chatId);
+        if (chat) {
+          broadcastToMembers(chat.members, 'message_deleted', { messageId });
+        }
+      }
+    } catch (err) {
+      console.error('DELETE_MSG_ERR:', err);
+    }
+  });
+
   socket.on('screenshot_detected', async ({ chatId }) => {
     if (!userSessionId || !chatId) return;
     const chat = await db.getChat(chatId);
