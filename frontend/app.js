@@ -1634,14 +1634,14 @@ function initiateForwardFlow(messageId, ownerId) {
   pendingForwardMessageId = messageId;
   pendingForwardOwnerId = ownerId;
   const dialog = document.getElementById('forwardDialog');
-  if (dialog) dialog.classList.remove('hidden');
+  if (dialog) dialog.classList.add('open');
   document.getElementById('forwardSearchInput').value = '';
   renderForwardTargets('');
 }
 
 function closeForwardDialog() {
   const dialog = document.getElementById('forwardDialog');
-  if (dialog) dialog.classList.add('hidden');
+  if (dialog) dialog.classList.remove('open');
   pendingForwardMessageId = null;
   pendingForwardOwnerId = null;
 }
