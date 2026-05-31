@@ -1550,6 +1550,29 @@ body.no-scroll {
 .message p {
   margin: 0;
   word-wrap: break-word;
+  white-space: pre-wrap;
+}
+
+.msg-forward-block {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.75rem;
+  color: var(--text-secondary);
+  background: var(--bg-surface);
+  padding: 4px 8px;
+  border-radius: var(--radius-sm);
+  margin-bottom: 6px;
+  border-left: 3px solid var(--accent);
+}
+.message.sent .msg-forward-block {
+  background: rgba(255, 255, 255, 0.15);
+  color: rgba(255, 255, 255, 0.9);
+  border-left-color: rgba(255, 255, 255, 0.6);
+}
+.msg-forward-icon {
+  flex-shrink: 0;
+  opacity: 0.8;
 }
 
 .message.sent .msg-link {

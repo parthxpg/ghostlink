@@ -1449,6 +1449,24 @@ async function renderMessage(msg) {
 
   const bubbleClass = isMine ? 'message sent' : 'message received';
 
+  // Check for forward format: [GL_FORWARD:Sender]Message
+  let forwardBlock = '';
+  const forwardMatch = plaintext.match(/^\[GL_FORWARD:(.*?)\](.*)$/s);
+  if (forwardMatch) {
+    const forwardSender = forwardMatch[1].replace(/</g, '&lt;').replace(/>/g, '&gt;');
+    plaintext = forwardMatch[2]; // Consume the forward tag
+
+    forwardBlock = `
+      <div class="msg-forward-block">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" class="msg-forward-icon">
+          <polyline points="15 10 20 15 15 20"></polyline>
+          <path d="M4 4v7a4 4 0 0 0 4 4h12"></path>
+        </svg>
+        <span>Forwarded from <strong>${forwardSender}</strong></span>
+      </div>
+    `;
+  }
+
   // Check for reply format: [GL_REPLY:Sender|Snippet]Message
   let replyBlock = '';
   const replyMatch = plaintext.match(/^\[GL_REPLY:(.*?)\|(.*?)\](.*)$/s);
@@ -1485,6 +1503,7 @@ async function renderMessage(msg) {
   const html = `
     <div class="${bubbleClass}" data-msg-id="${msg.id}">
       <span class="sender">${msg.senderId}</span>
+      ${forwardBlock}
       ${replyBlock}
       ${content}
       ${reactionsHtml}
@@ -1740,7 +1759,7 @@ async function forwardMessageToTarget(messageId, chatId, aesKey) {
     return;
   }
 
-  const forwardText = `Forwarded from ${activeForwardRequest.ownerId}\n${original}`;
+  const forwardText = `[GL_FORWARD:${activeForwardRequest.ownerId}]${original}`;
   const encrypted = await cryptoEngine.encryptBubble(forwardText, aesKey);
   const recipientKeys = {};
 
