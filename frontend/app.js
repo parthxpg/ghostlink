@@ -718,7 +718,10 @@ async function createGroupChat() {
       headers: getAuthHeaders(),
       body: JSON.stringify({ members, type: 'group', name, bio, createdBy: myGhostId })
     });
-    if (!res.ok) throw new Error('Failed to create group');
+    if (!res.ok) {
+      const errData = await res.json().catch(() => ({}));
+      throw new Error(errData.error || 'Failed to create group');
+    }
     const chat = await res.json();
     toggleGroupDialog();
     loadActiveChats();

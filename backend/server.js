@@ -214,9 +214,13 @@ app.post('/api/chats/create', async (req, res) => {
   if (!members || !Array.isArray(members) || members.length < 2) {
     return res.status(400).json({ error: 'Invalid participants' });
   }
-  const chat = await db.createChat(members, type, name, bio, createdBy);
-  broadcastToMembers(members, 'chat_created', chat);
-  return res.json(chat);
+  try {
+    const chat = await db.createChat(members, type, name, bio, createdBy);
+    broadcastToMembers(members, 'chat_created', chat);
+    return res.json(chat);
+  } catch (err) {
+    return res.status(400).json({ error: err.message });
+  }
 });
 
 app.get('/api/chats/:chatId', async (req, res) => {

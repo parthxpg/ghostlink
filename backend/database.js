@@ -279,6 +279,20 @@ class Database {
   async createChat(members, type = 'direct', name = '', bio = '', createdBy = '') {
     const chatId = 'chat_' + Math.random().toString(36).substring(2, 15);
     const creator = createdBy || members[0] || '';
+
+    // For group chats, enforce "Add me to Groups" privacy for every non-creator member
+    if (type === 'group') {
+      for (const memberId of members) {
+        if (memberId === creator) continue; // creator chose to make the group
+        const memberUser = await User.findOne({ username: memberId });
+        if (!memberUser) throw new Error(`User "${memberId}" not found`);
+        const priv = memberUser.privacySettings || this._defaultPrivacy();
+        if (priv.whoCanAddToGroups === 'nobody') {
+          throw new Error(`${memberId} has disabled group invites`);
+        }
+      }
+    }
+
     const inviteToken = type === 'group'
       ? Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15)
       : null;
@@ -333,8 +347,16 @@ class Database {
     if (!chat) throw new Error('Chat not found');
     if (chat.type === 'direct') throw new Error('Invalid chat type');
     if (!chat.inviteToken || chat.inviteToken !== token) throw new Error('Invalid invite link');
-    if (!(await User.findOne({ username: targetId }))) throw new Error('User not found');
+    const targetUser = await User.findOne({ username: targetId });
+    if (!targetUser) throw new Error('User not found');
     if (chat.members.includes(targetId)) throw new Error('Already a member');
+
+    // Enforce target user's "Add me to Groups" privacy setting
+    const priv = targetUser.privacySettings || this._defaultPrivacy();
+    if (priv.whoCanAddToGroups === 'nobody') {
+      throw new Error('You have disabled group invites in your privacy settings');
+    }
+
     chat.members.push(targetId);
     await chat.save();
     return this._plain(chat);
