@@ -395,5 +395,5 @@ io.on('connection', (socket) => {
 
 const PORT = process.env.PORT || 3000;
 db.connect()
-  .then(() => server.listen(PORT, () => console.log(`🚀 Ghost Link server running on port ${PORT}`)))
+  .then(() => server.listen(PORT, '0.0.0.0', () => console.log(`🚀 Ghost Link server running on port ${PORT}`)))
   .catch(err => { console.error('❌ DB connection failed:', err.message); process.exit(1); });
