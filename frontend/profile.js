@@ -425,6 +425,7 @@ window.profileModule = (() => {
     sendFeedback,
     openDeleteModal,
     closeDeleteModal,
-    confirmDeleteAccount
+    confirmDeleteAccount,
+    getPrivacySettings: () => _profile?.privacySettings || _defaultPrivacy()
   };
 })();

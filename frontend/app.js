@@ -1627,24 +1627,79 @@ async function handleIncomingMsg(msg) {
 /** ------------------------------------------------------------------
  *  Forward Handshakes & Approvals
  * ------------------------------------------------------------------ */
-let activeForwardRequest = null;
+let pendingForwardMessageId = null;
+let pendingForwardOwnerId = null;
+
 function initiateForwardFlow(messageId, ownerId) {
-  const targetId = prompt('Enter recipient Ghost ID for forwarded bubble:');
-  if (!targetId) return;
-  activeForwardRequest = { messageId, ownerId, receiverId: targetId };
-  socket.emit('request_forward', {
-    messageId,
-    ownerId,
-    receiverId: targetId
+  pendingForwardMessageId = messageId;
+  pendingForwardOwnerId = ownerId;
+  const dialog = document.getElementById('forwardDialog');
+  if (dialog) dialog.classList.remove('hidden');
+  document.getElementById('forwardSearchInput').value = '';
+  renderForwardTargets('');
+}
+
+function closeForwardDialog() {
+  const dialog = document.getElementById('forwardDialog');
+  if (dialog) dialog.classList.add('hidden');
+  pendingForwardMessageId = null;
+  pendingForwardOwnerId = null;
+}
+
+function renderForwardTargets(query) {
+  const q = query.toLowerCase();
+  const list = document.getElementById('forwardTargetList');
+  if (!list) return;
+
+  const filtered = activeChats.filter(chat => {
+    const title = chat.type === 'direct' ? chat.members.find(m => m !== myGhostId) : chat.name;
+    return title && title.toLowerCase().includes(q);
   });
-  showToast('Relaying forward permission request...', 'info');
+
+  list.innerHTML = filtered.map(chat => {
+    const title = chat.type === 'direct' ? chat.members.find(m => m !== myGhostId) : chat.name;
+    const subtitle = chat.type === 'direct' ? 'Direct Message' : 'Group';
+    
+    let avatarHtml = '';
+    const pfpBase64 = chat.type === 'direct' ? chat.peerProfile?.pfpBase64 : chat.pfpBase64;
+    if (pfpBase64) {
+      avatarHtml = `<div class="gip-member-avatar" style="background: transparent;"><img src="${pfpBase64}" style="width:100%;height:100%;border-radius:50%;object-fit:cover;"></div>`;
+    } else {
+      const initials = typeof profileModule !== 'undefined' ? profileModule.initials(title || '?') : '?';
+      const bg = typeof profileModule !== 'undefined' ? profileModule.avatarColor(title || '?') : '#555';
+      avatarHtml = `<div class="gip-member-avatar" style="background: ${bg}; color: #fff;">${initials}</div>`;
+    }
+    
+    return `
+      <li class="gip-member-item" onclick="submitForwardTarget('${chat.id}')">
+        ${avatarHtml}
+        <div class="gip-member-info">
+          <div class="gip-member-id">${title}</div>
+          <div class="gip-member-role">${subtitle}</div>
+        </div>
+      </li>
+    `;
+  }).join('');
+}
+
+function submitForwardTarget(chatId) {
+  if (!pendingForwardMessageId || !pendingForwardOwnerId) return;
+  activeForwardRequest = { messageId: pendingForwardMessageId, ownerId: pendingForwardOwnerId, receiverId: chatId };
+  socket.emit('request_forward', {
+    messageId: pendingForwardMessageId,
+    ownerId: pendingForwardOwnerId,
+    receiverId: chatId
+  });
+  showToast('Forwarding...', 'info');
+  closeForwardDialog();
 }
 
 function showForwardBanner(data) {
-  // Using pure JS prompt block for minimalist flow
-  const decision = confirm(`User ${data.requesterId} requests permission to forward your message to ${data.receiverId}. Approve?`);
+  // Enforce privacy setting: auto-approve if enabled, auto-deny if disabled.
+  const privacySettings = typeof profileModule !== 'undefined' ? profileModule.getPrivacySettings() : { messageForwarding: false };
+  const allowForwarding = privacySettings.messageForwarding === true;
 
-  if (decision) {
+  if (allowForwarding) {
     approveForward(data);
   } else {
     socket.emit('forward_decision', { requestId: data.requestId, decision: 'denied' });
@@ -1675,29 +1730,41 @@ async function approveForward(data) {
   });
 }
 
-async function forwardMessageToTarget(messageId, receiverId, aesKey) {
+async function forwardMessageToTarget(messageId, chatId, aesKey) {
   const original = decryptedMessages.get(messageId);
   if (!original) return;
 
-  let chat = activeChats.find(c => c.type === 'direct' && c.members.includes(receiverId));
+  const chat = activeChats.find(c => c.id === chatId);
   if (!chat) {
-    const res = await fetch(`${API_URL}/api/chats/create`, {
-      method: 'POST',
-      headers: getAuthHeaders(),
-      body: JSON.stringify({ members: [myGhostId, receiverId], type: 'direct' })
-    });
-    chat = await res.json();
+    showToast('Target chat not found', 'error');
+    return;
   }
 
-  const encrypted = await cryptoEngine.encryptBubble(`[Forwarded] ${original}`, aesKey);
+  const forwardText = `Forwarded from ${activeForwardRequest.ownerId}\n${original}`;
+  const encrypted = await cryptoEngine.encryptBubble(forwardText, aesKey);
   const recipientKeys = {};
-  recipientKeys[myGhostId] = await cryptoEngine.wrapMessageKey(aesKey, myPublicKeys.publicEncryptionJWK);
 
-  const res = await fetch(`${API_URL}/api/keys/${receiverId}`, {
-    headers: getAuthHeaders()
-  });
-  const bundle = await res.json();
-  recipientKeys[receiverId] = await cryptoEngine.wrapMessageKey(aesKey, bundle.identityKey);
+  for (const memberId of chat.members) {
+    if (memberId === myGhostId) {
+      recipientKeys[myGhostId] = await cryptoEngine.wrapMessageKey(aesKey, myPublicKeys.publicEncryptionJWK);
+    } else {
+      let peerKey = peerKeys.get(memberId)?.publicEncryptionJWK;
+      if (!peerKey) {
+        try {
+          const res = await fetch(`${API_URL}/api/keys/${memberId}`, { headers: getAuthHeaders() });
+          if (res.ok) {
+            const bundle = await res.json();
+            peerKey = bundle.identityKey;
+          }
+        } catch (err) {
+          console.error("Failed to fetch key for", memberId, err);
+        }
+      }
+      if (peerKey) {
+        recipientKeys[memberId] = await cryptoEngine.wrapMessageKey(aesKey, peerKey);
+      }
+    }
+  }
 
   socket.emit('send_encrypted_msg', {
     chatId: chat.id,

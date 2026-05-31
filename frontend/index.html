@@ -341,6 +341,16 @@
           <button onclick="createGroupChat()" class="group-create-btn">Create Group</button>
         </div>
 
+        <!-- Forward Message Dialog -->
+        <div class="group-dialog hidden" id="forwardDialog">
+          <div class="group-dialog-header">
+            <span>Forward Message</span>
+            <button onclick="closeForwardDialog()" class="group-dialog-close">✕</button>
+          </div>
+          <input id="forwardSearchInput" type="text" placeholder="Search chats..." class="group-dialog-input" oninput="renderForwardTargets(this.value)" autocomplete="off" style="margin-bottom: 8px;" />
+          <ul id="forwardTargetList" class="group-member-list" style="max-height: 250px; overflow-y: auto;"></ul>
+        </div>
+
         <!-- Contact Profile Panel (Telegram-style right slide-in) -->
         <div id="contactPanel" class="contact-panel">
           <div class="contact-panel-inner">
