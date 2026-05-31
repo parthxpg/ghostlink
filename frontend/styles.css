@@ -1553,26 +1553,47 @@ body.no-scroll {
   white-space: pre-wrap;
 }
 
-.msg-forward-block {
+.msg-forward-container {
+  border-left: 3px solid var(--accent);
+  padding-left: 8px;
+  margin-top: 2px;
+  margin-bottom: 4px;
+}
+.message.sent .msg-forward-container {
+  border-left-color: rgba(255, 255, 255, 0.6);
+}
+.msg-forward-title {
+  font-size: 0.75rem;
+  color: var(--accent);
+  margin-bottom: 2px;
+}
+.message.sent .msg-forward-title {
+  color: #fff;
+}
+.msg-forward-user {
   display: flex;
   align-items: center;
   gap: 6px;
-  font-size: 0.75rem;
-  color: var(--text-secondary);
-  background: var(--bg-surface);
-  padding: 4px 8px;
-  border-radius: var(--radius-sm);
-  margin-bottom: 6px;
-  border-left: 3px solid var(--accent);
+  margin-bottom: 4px;
 }
-.message.sent .msg-forward-block {
-  background: rgba(255, 255, 255, 0.15);
-  color: rgba(255, 255, 255, 0.9);
-  border-left-color: rgba(255, 255, 255, 0.6);
+.msg-forward-avatar {
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #fff;
+  font-size: 0.55rem;
+  font-weight: 600;
 }
-.msg-forward-icon {
-  flex-shrink: 0;
-  opacity: 0.8;
+.msg-forward-name {
+  font-size: 0.8rem;
+  color: var(--accent);
+  font-weight: 600;
+}
+.message.sent .msg-forward-name {
+  color: #fff;
 }
 
 .message.sent .msg-link {
