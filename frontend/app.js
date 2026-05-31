@@ -2263,7 +2263,7 @@ function cancelReply() {
 }
 
 function ctxForward() {
-  if (_ctxMsgId) initiateForwardFlow(_ctxMsgId, '');
+  if (_ctxMsgId) initiateForwardFlow(_ctxMsgId, _ctxMsgSender);
   document.getElementById('msgContextMenu').classList.add('hidden');
 }
 
